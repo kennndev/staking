@@ -314,13 +314,13 @@ function HeroOrbital() {
           "Instant Unstake",
           "Flexible Staking",
           "No Lock Penalty",
-          "Boosted Epochs",
+          "Surprises",
         ].map((t, i) => {
           const icons: Record<string, any> = {
             "Instant Unstake": LogOut,
             "Flexible Staking": RefreshCw,
             "No Lock Penalty": Unlock,
-            "Boosted Epochs": TrendingUp,
+            "Surprises": TrendingUp,
           };
           const Icon = icons[t] ?? Sparkles;
           return (
@@ -1086,19 +1086,19 @@ function StakeSimulator() {
               {userData && (
                 <div className="mt-8 p-6 bg-white/5 rounded-lg border border-white/10">
                   <h4 className="text-xl font-semibold mb-6 text-gradient text-center">Your Staking Info</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                     <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="text-3xl font-bold text-green-400 mb-2">{stakedDisplay}</div>
                       <div className="text-sm text-foreground/70 font-medium">Currently Staked</div>
                     </div>
-                    <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+                    {/*<div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="text-3xl font-bold text-blue-400 mb-2">{rewardsDisplay}</div>
                       <div className="text-sm text-foreground/70 font-medium">Pending Rewards</div>
                     </div>
                     <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="text-3xl font-bold text-purple-400 mb-2">{aprDisplay}</div>
                       <div className="text-sm text-foreground/70 font-medium">Current APR</div>
-                    </div>
+                    </div>*/}
                   </div>
                 </div>
               )}
@@ -1178,11 +1178,15 @@ function FAQ() {
         <div className="mt-6 grid gap-4">
           <QA
             q="Is this the official NPC staking?"
-            a="This is a next-generation landing and simulation experience for the NPC token on Solana."
+            a="Yes, this is the official staking portal for the NPC token on Solana."
+          />
+           <QA
+            q="How can you get more insights into the NPC token?"
+            a="By joining or following our official twitter account and discord server."
           />
           <QA
             q="Can I unstake anytime?"
-            a="Yes. There's no penalty. Longer durations may unlock boost multipliers."
+            a="Yes. There's no penalty. Longer durations may unlock surprises."
           />
           <QA
             q="Where did NPC launch?"
@@ -1194,7 +1198,7 @@ function FAQ() {
           />
           <QA
             q="How do I get NPC tokens?"
-            a="You can purchase NPC tokens on Solana DEXs like Raydium, Jupiter, or directly on pump.fun. Always DYOR before investing."
+            a="You can purchase NPC tokens on Solana DEXs like Raydium, Jupiter, pump.fun or directly on Dexscreener. Always DYOR before investing."
           />
                <QA
             q="What games can I play?"
