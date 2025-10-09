@@ -174,12 +174,21 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-    // Check if connected wallet is admin
+    // Check if connected wallet is admin (compare against actual pool admin)
     useEffect(() => {
-      const admin = ADMIN_WALLET.toBase58();
-      const isAdminWallet = walletAddress === admin;
-      setIsAdmin(!!walletAddress && isAdminWallet);
-    }, [walletAddress]);
+      if (!walletAddress || !poolData) {
+        setIsAdmin(false);
+        return;
+      }
+      
+      const isAdminWallet = walletAddress === poolData.admin;
+      setIsAdmin(isAdminWallet);
+      console.log('🔍 Admin check:', { 
+        walletAddress, 
+        poolAdmin: poolData.admin, 
+        isAdmin: isAdminWallet 
+      });
+    }, [walletAddress, poolData]);
   
     // Auto-detect pool when wallet connects
     useEffect(() => {
@@ -234,12 +243,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Check if connected wallet is admin
-  useEffect(() => {
-    const admin = ADMIN_WALLET.toBase58();
-    const isAdminWallet = walletAddress === admin;
-    setIsAdmin(!!walletAddress && isAdminWallet);
-  }, [walletAddress]);
+  // Admin check is now handled above with poolData dependency
 
   // Auto-detect pool when wallet connects
   useEffect(() => {
