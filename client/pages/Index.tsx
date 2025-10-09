@@ -694,7 +694,6 @@ function StakeSimulator() {
   };
 
   const handleStake = async () => {
-    console.log('🎯 HANDLE STAKE CLICKED!', { walletAddress, amount, poolData });
     if (!walletAddress) {
       showWarning("Wallet Required", "Please connect your wallet first");
       return;
@@ -714,7 +713,6 @@ function StakeSimulator() {
     }
 
     if (isLoading) {
-      console.log("Transaction already in progress, ignoring click");
       return;
     }
 
@@ -724,9 +722,7 @@ function StakeSimulator() {
     }
 
     try {
-      console.log('🔄 CALLING STAKE FUNCTION WITH AMOUNT:', amount);
       await stake(amount);
-      console.log('✅ STAKE FUNCTION COMPLETED SUCCESSFULLY');
       showSuccess(
         "Staking Successful",
         `Your ${amount.toLocaleString()} NPC stake request was submitted.`
@@ -741,15 +737,6 @@ function StakeSimulator() {
   };
 
   const handleUnstake = async () => {
-    console.log('🔘 UNSTAKE BUTTON CLICKED!', { 
-      walletAddress, 
-      isLoading, 
-      hasValidUnstakeAmount, 
-      unstakeAmount,
-      stakedTokens,
-      userData,
-      pendingRewardsValue
-    });
 
     if (!walletAddress) {
       showWarning("Wallet Required", "Please connect your wallet first");
@@ -757,7 +744,6 @@ function StakeSimulator() {
     }
 
     if (isLoading) {
-      console.log("Transaction already in progress, ignoring click");
       return;
     }
 
@@ -824,7 +810,6 @@ function StakeSimulator() {
     }
 
     if (isLoading) {
-      console.log("Transaction already in progress, ignoring click");
       return;
     }
 
@@ -960,14 +945,7 @@ function StakeSimulator() {
                   <Button 
                     className="btn-gradient w-full" 
                     onClick={() => {
-                      console.log('🔘 STAKE BUTTON CLICKED!', { 
-                        isLoading, 
-                        poolPaused: poolData?.paused, 
-                        hasValidAmount, 
-                        amount,
-                        disabled: isLoading || poolData?.paused || !hasValidAmount 
-                      });
-                      handleStake();
+                                          handleStake();
                     }}
                     disabled={isLoading || poolData?.paused || !hasValidAmount}
                   >
