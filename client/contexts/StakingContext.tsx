@@ -1296,16 +1296,16 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     try {
       console.log('Unstaking tokens:', { amount, walletAddress, poolAddress: poolData.poolAddress });
       
-      // IMPORTANT: Claim rewards first to preserve them before unstaking
+      // COMMENTED OUT: Claim rewards first to preserve them before unstaking
       // This prevents the unstake from resetting pending rewards
-      console.log('🔄 Claiming rewards before unstaking to preserve them...');
-      try {
-        await claim();
-        console.log('✅ Rewards claimed successfully before unstaking');
-      } catch (claimError) {
-        console.log('⚠️ Could not claim rewards before unstaking (this is OK if no rewards to claim):', claimError);
-        // Continue with unstake even if claim fails (user might have no rewards)
-      }
+      // console.log('🔄 Claiming rewards before unstaking to preserve them...');
+      // try {
+      //   await claim();
+      //   console.log('✅ Rewards claimed successfully before unstaking');
+      // } catch (claimError) {
+      //   console.log('⚠️ Could not claim rewards before unstaking (this is OK if no rewards to claim):', claimError);
+      //   // Continue with unstake even if claim fails (user might have no rewards)
+      // }
       
       // Create wallet adapter
       const wallet = {
