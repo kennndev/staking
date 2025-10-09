@@ -37,6 +37,7 @@ export default function Admin() {
     stakingMint,
     stakingDecimals,
     rewardDecimals,
+    walletAddress,
     initializePool,
     fetchPoolByMint,
     setStakingMint,
@@ -358,6 +359,27 @@ export default function Admin() {
       showError(
         "Fetch failed",
         err instanceof Error ? err.message : "Unable to fetch admin.",
+      );
+    }
+  };
+
+  const handleSetCurrentWalletAsAdmin = async () => {
+    if (!walletAddress) {
+      showWarning("No wallet connected", "Please connect your wallet first.");
+      return;
+    }
+    try {
+      await setAdmin(walletAddress);
+      showSuccess(
+        "Admin updated",
+        `Ownership transferred to your wallet: ${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`,
+      );
+      setNextAdmin("");
+      await refreshData();
+    } catch (err) {
+      showError(
+        "Transfer failed",
+        err instanceof Error ? err.message : "Unable to set new admin.",
       );
     }
   };
@@ -849,18 +871,42 @@ export default function Admin() {
                 Fetch Current Admin
               </Button>
             </div>
-            <Input
-              value={nextAdmin}
-              onChange={(event) => setNextAdmin(event.target.value)}
-              placeholder="New admin wallet address"
-            />
-            <Button
-              variant="secondary"
-              onClick={handleTransferAdmin}
-              disabled={isLoading}
-            >
-              Set new admin
-            </Button>
+            
+            {walletAddress && (
+              <div className="space-y-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-blue-300">Your Connected Wallet</span>
+                  <span className="font-mono text-sm text-blue-400">
+                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                  </span>
+                </div>
+                <Button
+                  variant="default"
+                  onClick={handleSetCurrentWalletAsAdmin}
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Set My Wallet as Admin
+                </Button>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70">Or enter custom admin address:</label>
+              <Input
+                value={nextAdmin}
+                onChange={(event) => setNextAdmin(event.target.value)}
+                placeholder="Custom admin wallet address"
+              />
+              <Button
+                variant="secondary"
+                onClick={handleTransferAdmin}
+                disabled={isLoading}
+                className="w-full"
+              >
+                Set Custom Admin
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </section>
