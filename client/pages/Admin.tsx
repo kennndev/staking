@@ -407,13 +407,18 @@ export default function Admin() {
   };
 
   const handleTransferProgramAuthority = async () => {
+    console.log('🔧 Generate CLI Command clicked!', { newProgramAuthority });
+    
     if (!newProgramAuthority.trim()) {
+      console.log('❌ No authority address provided');
       showWarning("Missing address", "Enter a wallet to transfer program authority to.");
       return;
     }
     
     // Show CLI command instead of trying to execute it
     const cliCommand = `solana program set-upgrade-authority CG7e3BfRFQn1AVUdXFRUsQBiKHtSpCiH7afhpJaoE4PT ${newProgramAuthority.trim()}`;
+    
+    console.log('📋 Generated CLI command:', cliCommand);
     
     showInfo(
       "CLI Command Required",
@@ -422,8 +427,17 @@ export default function Admin() {
     
     // Copy to clipboard if possible
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(cliCommand);
-      showSuccess("Command Copied", "CLI command copied to clipboard!");
+      try {
+        await navigator.clipboard.writeText(cliCommand);
+        console.log('✅ Command copied to clipboard');
+        showSuccess("Command Copied", "CLI command copied to clipboard!");
+      } catch (err) {
+        console.error('❌ Failed to copy to clipboard:', err);
+        showError("Copy Failed", "Could not copy to clipboard. Please copy manually.");
+      }
+    } else {
+      console.log('❌ Clipboard not available');
+      showWarning("Copy Failed", "Clipboard not available. Please copy the command manually.");
     }
   };
 
