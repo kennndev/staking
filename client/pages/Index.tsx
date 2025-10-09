@@ -312,13 +312,13 @@ function HeroOrbital() {
       <div className="relative grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           "Instant Unstake",
-          "Auto-Compound",
+          "Flexible Staking",
           "No Lock Penalty",
           "Boosted Epochs",
         ].map((t, i) => {
           const icons: Record<string, any> = {
             "Instant Unstake": LogOut,
-            "Auto-Compound": RefreshCw,
+            "Flexible Staking": RefreshCw,
             "No Lock Penalty": Unlock,
             "Boosted Epochs": TrendingUp,
           };

@@ -24,7 +24,7 @@ const games: Game[] = [
     icon: '🛡️',
     component: CyberDefense,
     isAvailable: true,
-    stakingRequirement: 10_000_000_000, // 10,000 tokens (base units for 6-decimal token)
+    stakingRequirement: 145_000_000_000, // 145,000 tokens (base units for 6-decimal token)
     tier: 1,
   },
   {
@@ -34,7 +34,7 @@ const games: Game[] = [
     icon: '🫧',
     component: PopPop,
     isAvailable: true,
-    stakingRequirement: 10_000_000_000, // 10,000 tokens (base units for 6-decimal token)
+    stakingRequirement: 145_000_000_000, // 145,000 tokens (base units for 6-decimal token)
     tier: 1,
   },
 ];
@@ -75,7 +75,7 @@ export default function GamesSection() {
 
   // Helper function to get user's current tier
   const getUserTier = (): number => {
-    if (userStakedAmount >= 10_000_000_000) return 1; // All games (10,000 tokens)
+    if (userStakedAmount >= 145_000_000_000) return 1; // All games (145,000 tokens)
     return 0; // No access
   };
 
@@ -177,13 +177,13 @@ export default function GamesSection() {
           <div className="text-center">
             <div className="text-2xl mb-2">🔒</div>
             <h3 className="font-semibold text-white mb-1">Locked</h3>
-            <p className="text-sm text-gray-300">Less than 10,000 tokens</p>
+            <p className="text-sm text-gray-300">Less than 145,000 tokens</p>
             <p className="text-xs text-red-400">No game access</p>
           </div>
           <div className="text-center">
             <div className="text-2xl mb-2">🎮</div>
             <h3 className="font-semibold text-white mb-1">Unlocked</h3>
-            <p className="text-sm text-gray-300">10,000+ tokens</p>
+            <p className="text-sm text-gray-300">145,000+ tokens</p>
             <p className="text-xs text-green-400">All Games Available</p>
           </div>
         </div>
