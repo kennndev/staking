@@ -1038,8 +1038,5 @@
       "name": "Reentrancy",
       "msg": "Re-entrancy detected"
     }
-  ],
-  "metadata": {
-    "address": "4SumU3Q5bVZam6uTLpPdhtx9rYVazwJnWbJvajRf6U9V"
-  }
+  ]
 }
