@@ -4,6 +4,7 @@
   "framework": "vite",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "devCommand": "pnpm dev",
+  "public": true,
   "rewrites": [
     {
       "source": "/(.*)",
