@@ -143,7 +143,7 @@ export default function Admin() {
     { label: "0.001 tokens/sec (low)", value: 0.001 },
   ];
 
-  if (!isAdmin) {
+  if (!isAdmin && poolData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center p-6">
         <Card className="max-w-md bg-black/40 border-white/10 text-center">
