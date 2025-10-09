@@ -1,10 +1,9 @@
 {
-  "buildCommand": "pnpm run build:client",
+  "buildCommand": "npm run build:client",
   "outputDirectory": "dist",
   "framework": "vite",
-  "installCommand": "pnpm install --no-frozen-lockfile",
-  "devCommand": "pnpm dev",
-  "public": true,
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
   "rewrites": [
     {
       "source": "/(.*)",
