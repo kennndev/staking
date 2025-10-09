@@ -46,6 +46,7 @@ export default function Admin() {
     setPaused,
     withdrawRewards,
     setAdmin,
+    fetchAdmin,
     ensureVaults,
     closePool,
     refreshData,
@@ -66,6 +67,7 @@ export default function Admin() {
   const [updateRewardRate, setUpdateRewardRate] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [nextAdmin, setNextAdmin] = useState("");
+  const [currentAdmin, setCurrentAdmin] = useState<string | null>(null);
   const [rewardVaultBalance, setRewardVaultBalance] = useState<
     number | null
   >(null);
@@ -336,6 +338,26 @@ export default function Admin() {
       showError(
         "Withdrawal failed",
         err instanceof Error ? err.message : "Unable to withdraw rewards.",
+      );
+    }
+  };
+
+  const handleFetchAdmin = async () => {
+    try {
+      const admin = await fetchAdmin();
+      setCurrentAdmin(admin);
+      if (admin) {
+        showSuccess(
+          "Admin fetched",
+          `Current admin: ${admin.slice(0, 4)}...${admin.slice(-4)}`,
+        );
+      } else {
+        showWarning("No admin found", "Could not fetch admin from pool.");
+      }
+    } catch (err) {
+      showError(
+        "Fetch failed",
+        err instanceof Error ? err.message : "Unable to fetch admin.",
       );
     }
   };
@@ -808,10 +830,29 @@ export default function Admin() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-foreground/70">Current Admin</span>
+                <span className="font-mono text-sm">
+                  {currentAdmin 
+                    ? `${currentAdmin.slice(0, 4)}...${currentAdmin.slice(-4)}`
+                    : "Not fetched"
+                  }
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleFetchAdmin}
+                disabled={isLoading}
+                className="w-full"
+              >
+                Fetch Current Admin
+              </Button>
+            </div>
             <Input
               value={nextAdmin}
               onChange={(event) => setNextAdmin(event.target.value)}
-              placeholder="Admin wallet address"
+              placeholder="New admin wallet address"
             />
             <Button
               variant="secondary"

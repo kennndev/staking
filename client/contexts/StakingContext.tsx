@@ -128,6 +128,7 @@ interface StakingContextType {
   claim: () => Promise<void>;
   withdrawRewards: (amount: number) => Promise<void>;
   setAdmin: (newAdmin: string) => Promise<void>;
+  fetchAdmin: () => Promise<string | null>;
   ensureVaults: () => Promise<void>;
   closeUser: () => Promise<void>;
   closePool: () => Promise<void>;
@@ -2549,6 +2550,46 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Fetch current admin from the pool
+  const fetchAdmin = async (): Promise<string | null> => {
+    if (!poolData) {
+      console.log('No pool data available to fetch admin');
+      return null;
+    }
+    
+    try {
+      console.log('Fetching current admin from pool:', poolData.poolAddress);
+      
+      const poolPDA = pk(poolData.poolAddress);
+      const poolAccount = await connection.getAccountInfo(poolPDA);
+      
+      if (!poolAccount) {
+        console.log('Pool account not found');
+        return null;
+      }
+      
+      // Parse the pool account data to get the admin
+      // The admin is typically the first 32 bytes of the account data
+      const data = poolAccount.data;
+      if (data.length < 32) {
+        console.log('Invalid pool account data');
+        return null;
+      }
+      
+      // Extract admin public key (first 32 bytes)
+      const adminBytes = data.slice(0, 32);
+      const adminPubkey = new PublicKey(adminBytes);
+      const adminAddress = adminPubkey.toBase58();
+      
+      console.log('✅ Current admin fetched:', adminAddress);
+      return adminAddress;
+      
+    } catch (e: any) {
+      console.error('❌ Failed to fetch admin:', e);
+      return null;
+    }
+  };
+
   // Admin function: ensure vaults exist
   const ensureVaults = async () => {
     if (!isAdmin || !walletAddress || !poolData) throw new Error('Admin access required');
@@ -2743,6 +2784,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     claim,
     withdrawRewards,
     setAdmin,
+    fetchAdmin,
     ensureVaults,
     closeUser,
     closePool,
