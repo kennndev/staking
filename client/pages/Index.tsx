@@ -585,7 +585,7 @@ function Rewards() {
       <GlowOrbs />
       <div className="container">
         <div className="glass gradient-border p-6 md:p-8 reveal" data-reveal>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
+          <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 items-center">
             <div>
               <h3 className="text-2xl font-extrabold">Live Analytics</h3>
               <p className="text-foreground/80 mt-2">
