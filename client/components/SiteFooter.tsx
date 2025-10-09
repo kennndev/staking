@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
       <div className="container py-10 text-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="opacity-80">
-          © {new Date().getFullYear()} NPC Stake. Built for the Solana ecosystem.
+          © {new Date().getFullYear()} powered by NickPlaysCrypto.
         </div>
         <div className="flex items-center gap-4">
           <a 

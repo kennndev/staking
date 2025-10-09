@@ -94,6 +94,7 @@ interface StakingContextType {
   poolData: PoolData | null;
   userData: UserData | null;
   isLoading: boolean;
+  isInitialLoad: boolean;
   error: string | null;
   stakingMint: string | null;
   stakingDecimals: number;
@@ -130,7 +131,7 @@ interface StakingContextType {
   ensureVaults: () => Promise<void>;
   closeUser: () => Promise<void>;
   closePool: () => Promise<void>;
-  refreshData: () => Promise<void>;
+  refreshData: (forceRefresh?: boolean) => Promise<void>;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
 }
@@ -145,6 +146,15 @@ export function StakingProvider({ children }: { children: ReactNode }) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Performance optimizations
+  const [dataCache, setDataCache] = useState<{
+    poolData?: PoolData;
+    userData?: UserData;
+    timestamp?: number;
+  }>({});
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const CACHE_DURATION = 30000; // 30 seconds cache
   const initialStakingMint =
     ENV.STAKING_MINT && ENV.STAKING_MINT !== '11111111111111111111111111111111'
       ? ENV.STAKING_MINT
@@ -238,10 +248,30 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletAddress, poolData]);
 
+  // Background refresh every 30 seconds
+  useEffect(() => {
+    if (!walletAddress || !poolData) return;
+    
+    const interval = setInterval(() => {
+      refreshData(false); // Use cache if available
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [walletAddress, poolData]);
+
   // --- Data refresh ----------------------------------------------------------
 
-  const refreshData = async () => {
+  const refreshData = async (forceRefresh = false) => {
     if (!walletAddress) return;
+
+    // Check cache first
+    const now = Date.now();
+    if (!forceRefresh && dataCache.timestamp && (now - dataCache.timestamp) < CACHE_DURATION) {
+      console.log('📦 Using cached data');
+      if (dataCache.poolData) setPoolData(dataCache.poolData);
+      if (dataCache.userData) setUserData(dataCache.userData);
+      return;
+    }
 
     setIsLoading(true); 
     setError(null);
@@ -287,8 +317,11 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           throw new Error('Detected stakingMint used as pool. Pool must be the Pool PDA.');
         }
 
-        // Fetch Pool
-        const pool = await (program.account as any).pool.fetch(poolPDA);
+        // Parallel fetch for better performance
+        const [pool, userInfo] = await Promise.all([
+          (program.account as any).pool.fetch(poolPDA),
+          connection.getAccountInfo(userPda(program.programId, poolPDA, pk(walletAddress)))
+        ]);
         
         console.log('Raw pool data from blockchain:', {
           stakingMint: pool.stakingMint?.toBase58?.() ?? 'undefined',
@@ -299,7 +332,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           admin: pool.admin?.toBase58?.() ?? 'undefined'
         });
         
-        setPoolData({
+        const newPoolData = {
           poolAddress: poolPDA.toBase58(),
           admin: pool.admin?.toBase58() ?? 'Unknown',
           stakingMint: pool.stakingMint?.toBase58() ?? 'Unknown',
@@ -316,13 +349,14 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           locked: pool.locked ?? false,
           bump: pool.bump ?? 0,
           signerBump: pool.signerBump ?? 0,
-        });
+        };
+        
+        setPoolData(newPoolData);
 
-        // Fetch User only if the PDA exists
-        const userPDA = userPda(program.programId, poolPDA, pk(walletAddress));
-        const userInfo = await connection.getAccountInfo(userPDA);
+        // Fetch User data if account exists
+        let newUserData: UserData | null = null;
         if (userInfo) {
-          const user = await (program.account as any).user.fetch(userPDA);
+          const user = await (program.account as any).user.fetch(userPda(program.programId, poolPDA, pk(walletAddress)));
           console.log('🔍 User account data:', {
             owner: user.owner?.toBase58(),
             staked: user.staked?.toNumber(),
@@ -330,21 +364,30 @@ export function StakingProvider({ children }: { children: ReactNode }) {
             unpaidRewards: user.unpaidRewards?.toString(),
             bump: user.bump
           });
-          setUserData({
+          newUserData = {
             owner: user.owner?.toBase58() ?? 'Unknown',
             staked: user.staked?.toNumber?.() ?? 0,
             debt: user.debt?.toString?.() ?? '0',
             unpaidRewards: user.unpaidRewards?.toString?.() ?? '0',
             bump: user.bump ?? 0,
-          });
+          };
+          setUserData(newUserData);
         } else {
           console.log('❌ User account not found - user needs to initialize');
           setUserData(null);
         }
+
+        // Update cache
+        setDataCache({
+          poolData: newPoolData,
+          userData: newUserData,
+          timestamp: now
+        });
       } else {
         // no pool created yet
         setPoolData(null);
         setUserData(null);
+        setDataCache({});
       }
     } catch (e: any) {
       console.error('refreshData error:', e);
@@ -356,6 +399,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       setIsLoading(false);
+      setIsInitialLoad(false);
     }
   };
 
@@ -2675,6 +2719,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     poolData,
     userData,
     isLoading,
+    isInitialLoad,
     error,
     stakingMint,
     stakingDecimals,

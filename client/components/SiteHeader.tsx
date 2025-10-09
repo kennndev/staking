@@ -102,9 +102,9 @@ export function SiteHeader() {
           <button onClick={() => handleNavigation('how')} className="nav-link">
             How it works
           </button>
-          <button onClick={() => handleNavigation('rewards')} className="nav-link">
+         {/* <button onClick={() => handleNavigation('rewards')} className="nav-link">
             Rewards
-          </button>
+          </button>*/}
           <button onClick={() => handleNavigation('stake')} className="nav-link">
             Stake
           </button>
@@ -195,12 +195,12 @@ export function SiteHeader() {
               >
                 How it works
               </button>
-              <button 
+              {/*<button 
                 onClick={() => handleNavigation('rewards')} 
                 className="text-left py-2 px-3 rounded-lg hover:bg-white/5 transition-colors"
               >
                 Rewards
-              </button>
+              </button>*/}
               <button 
                 onClick={() => handleNavigation('stake')} 
                 className="text-left py-2 px-3 rounded-lg hover:bg-white/5 transition-colors"

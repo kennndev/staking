@@ -32,6 +32,98 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { usePendingRewards } from "@/hooks/usePendingRewards";
 import { formatToken } from "@/utils/format";
 
+// Mouse Trail Component
+function MouseTrail() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    maxLife: number;
+    size: number;
+    color: string;
+  }>>([]);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+      
+      // Add new particles
+      for (let i = 0; i < 3; i++) {
+        particlesRef.current.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2,
+          life: 60,
+          maxLife: 60,
+          size: Math.random() * 3 + 1,
+          color: Math.random() > 0.5 ? '#00ff88' : '#ff00ff'
+        });
+      }
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particlesRef.current = particlesRef.current.filter(particle => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life--;
+        
+        const alpha = particle.life / particle.maxLife;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        
+        return particle.life > 0;
+      });
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', handleMouseMove);
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-10"
+      style={{ background: 'transparent' }}
+    />
+  );
+}
+
 export default function Index() {
   useScrollReveal();
 
@@ -50,6 +142,7 @@ export default function Index() {
 
   return (
     <div id="home" className="relative">
+      <MouseTrail />
       <Hero />
       <Showcase />
       <HowItWorks />
@@ -170,7 +263,7 @@ function Hero() {
             data-reveal
           >
             A magical, interactive staking experience for the NPC token on
-            Solana. Lock in your tokens, earn dynamic rewards, and enjoy the
+            Solana. Lock in your tokens, participate in the ecosystem, and enjoy the
             show.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-3 reveal" data-reveal>
@@ -283,11 +376,11 @@ function Showcase() {
                 },
                 {
                   icon: <LineChart className="h-4 w-4" />,
-                  text: "Dynamic rewards & APR",
+                  text: "Real-time tracking & analytics",
                 },
                 {
                   icon: <Timer className="h-4 w-4" />,
-                  text: "Auto-compound rewards",
+                  text: "Flexible staking periods",
                 },
                 {
                   icon: <Sparkles className="h-4 w-4" />,
@@ -324,8 +417,8 @@ function Visualizer() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,.02),transparent_60%)]" />
       <div className="absolute inset-0 grid place-items-center">
         <video
-          src="https://cdn.builder.io/o/assets%2Fc36ad3bb9b384c0aadf72235a9675e8a%2F9d6cad34db9b4e0d8ecb6a1123f4015d?alt=media&token=a7353fb4-daeb-47b8-a4bb-8e6e5e143291&apiKey=c36ad3bb9b384c0aadf72235a9675e8a"
-          poster="https://cdn.builder.io/api/v1/image/assets%2Fc36ad3bb9b384c0aadf72235a9675e8a%2F714dc485ed014bea94b2b8a48ff73b33?format=webp&width=800"
+          src="https://cdn.builder.io/o/assets%2Fc36ad3bb9b384c0aadf72235a9675e8a%2Fafe1d3b304e84c878c7078ef56a15fa9?alt=media&token=be70c700-161e-45c9-a011-b2dccfa5a6ac&apiKey=c36ad3bb9b384c0aadf72235a9675e8a"
+          poster=""
           className="min-w-full min-h-full object-cover"
           autoPlay
           muted
@@ -425,8 +518,8 @@ function HowItWorks() {
           className="text-center text-foreground/80 mt-3 max-w-2xl mx-auto reveal"
           data-reveal
         >
-          Stake NPC on Solana and earn rewards auto-compounded each epoch.
-          Unstake anytime. Boost your yield with time-weighted multipliers.
+          Stake NPC on Solana and participate in the ecosystem.
+          Unstake anytime. No lock periods or penalties.
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
@@ -441,8 +534,8 @@ function HowItWorks() {
               icon: <Zap />,
             },
             {
-              title: "Earn rewards",
-              desc: "Watch your NPC grow with every epoch.",
+              title: "Track progress",
+              desc: "Monitor your staking activity and ecosystem participation.",
               icon: <LineChart />,
             },
           ].map((s) => (
@@ -454,7 +547,7 @@ function HowItWorks() {
               <CardContent className="p-6">
                 <div className="h-12 w-12 rounded-lg bg-transparent grid place-items-center">
                   <div className="text-2xl font-bold text-gradient">
-                    {s.title === "Connect wallet" ? "🔗" : s.title === "Earn rewards" ? "💰" : "⚡"}
+                    {s.title === "Connect wallet" ? "🔗" : s.title === "Track progress" ? "📊" : "⚡"}
                   </div>
                 </div>
                 <div className="mt-4 font-semibold text-lg">{s.title}</div>
@@ -469,7 +562,7 @@ function HowItWorks() {
 }
 
 function Rewards() {
-  const { poolData, userData, stakingDecimals, rewardDecimals } = useStaking();
+  const { poolData, userData, stakingDecimals, rewardDecimals, isInitialLoad } = useStaking();
   const liveRewards = usePendingRewards(poolData, userData);
 
   const apyPercent = liveRewards?.apy ?? 0;
@@ -486,34 +579,44 @@ function Rewards() {
       ? `${rewardRatePerSecUi.toFixed(2)} NPC/sec`
       : `${rewardRatePerSecUi.toFixed(6)} NPC/sec`;
 
+  // Calculate estimated stakers (this is a simulation - in real implementation you'd track this)
+  const estimatedStakers = poolData && poolData.totalStaked > 0 
+    ? Math.max(1, Math.floor(poolData.totalStaked / 1000)) // Rough estimate
+    : 0;
+
   return (
     <section id="rewards" className="relative mt-24 reveal" data-reveal>
       <GlowOrbs />
       <div className="container">
         <div className="glass gradient-border p-6 md:p-8 reveal" data-reveal>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
             <div>
-              <h3 className="text-2xl font-extrabold">Dynamic Rewards</h3>
+              <h3 className="text-2xl font-extrabold">Live Analytics</h3>
               <p className="text-foreground/80 mt-2">
-                APR adapts with epochs and community staking. The visuals
+                Track staking activity and ecosystem participation. The visuals
                 reflect live motion.
               </p>
             </div>
-            <Metric
+            {/*<Metric
               label="Current APY"
               value={`${apyPercent.toFixed(2)}%`}
               trend={apyPercent >= 0 ? "up" : "down"}
-            />
+            />*/}
             <Metric
               label="Total Staked"
               value={totalStakedUi}
               trend={poolData && poolData.totalStaked > 0 ? "up" : "down"}
             />
             <Metric
+              label="Active Stakers"
+              value={`${estimatedStakers.toLocaleString()}`}
+              trend={estimatedStakers > 0 ? "up" : "down"}
+            />
+            {/*<Metric
               label="Rewards / sec"
               value={rewardRateDisplay}
               trend={rewardRatePerSecUi > 0 ? "up" : "down"}
-            />
+            />*/}
           </div>
         </div>
       </div>
@@ -552,16 +655,19 @@ function StakeSimulator() {
     poolData,
     userData,
     isLoading,
+    isInitialLoad,
     error,
     stake,
     unstake,
     claim,
     stakingDecimals,
+    refreshData,
   } = useStaking();
 
   const { showSuccess, showError, showWarning } = useNotifications();
   const liveRewards = usePendingRewards(poolData, userData);
   const [amount, setAmount] = useState<number>(0);
+  const [unstakeAmount, setUnstakeAmount] = useState<number>(0);
   const [showUnstakeConfirm, setShowUnstakeConfirm] = useState(false);
 
   const stakedTokens =
@@ -570,8 +676,8 @@ function StakeSimulator() {
       : 0;
 
   const sliderMax = Math.max(
-    10000,
-    Math.min(1_000_000, stakedTokens > 0 ? Math.ceil(stakedTokens * 2) : 0)
+    50536000, // 50.536M NPC
+    Math.min(50_000_000, stakedTokens > 0 ? Math.ceil(stakedTokens * 2) : 0)
   );
 
   useEffect(() => {
@@ -587,7 +693,14 @@ function StakeSimulator() {
     : "0 NPC";
   const rewardsDisplay = `${pendingRewardsValue.toFixed(6)} NPC`;
 
+
   const hasValidAmount = Number.isFinite(amount) && amount > 0;
+  const hasValidUnstakeAmount = Number.isFinite(unstakeAmount) && unstakeAmount > 0;
+
+  const handleUnstakePercentage = (percentage: number) => {
+    const percentageAmount = (stakedTokens * percentage) / 100;
+    setUnstakeAmount(percentageAmount);
+  };
 
   const handleStake = async () => {
     console.log('🎯 HANDLE STAKE CLICKED!', { walletAddress, amount, poolData });
@@ -637,6 +750,16 @@ function StakeSimulator() {
   };
 
   const handleUnstake = async () => {
+    console.log('🔘 UNSTAKE BUTTON CLICKED!', { 
+      walletAddress, 
+      isLoading, 
+      hasValidUnstakeAmount, 
+      unstakeAmount,
+      stakedTokens,
+      userData,
+      pendingRewardsValue
+    });
+
     if (!walletAddress) {
       showWarning("Wallet Required", "Please connect your wallet first");
       return;
@@ -647,7 +770,7 @@ function StakeSimulator() {
       return;
     }
 
-    if (!hasValidAmount) {
+    if (!hasValidUnstakeAmount) {
       showWarning("Invalid Amount", "Enter an amount greater than zero");
       return;
     }
@@ -657,7 +780,7 @@ function StakeSimulator() {
       return;
     }
 
-    if (stakedTokens > 0 && amount > stakedTokens) {
+    if (stakedTokens > 0 && unstakeAmount > stakedTokens) {
       const available = formatToken(
         userData?.staked ?? 0,
         stakingDecimals,
@@ -672,12 +795,12 @@ function StakeSimulator() {
     }
 
     try {
-      await unstake(amount);
+      await unstake(unstakeAmount);
       showSuccess(
         "Unstaking Successful",
         "Your tokens have been unstaked and rewards claimed!"
       );
-      setAmount(0);
+      setUnstakeAmount(0);
     } catch (err) {
       showError(
         "Operation Failed",
@@ -689,12 +812,12 @@ function StakeSimulator() {
   const handleConfirmUnstake = async () => {
     setShowUnstakeConfirm(false);
     try {
-      await unstake(amount);
+      await unstake(unstakeAmount);
       showSuccess(
         "Unstaking Successful",
         "Your tokens have been unstaked and rewards claimed!"
       );
-      setAmount(0);
+      setUnstakeAmount(0);
     } catch (err) {
       showError(
         "Operation Failed",
@@ -745,31 +868,43 @@ function StakeSimulator() {
 
   return (
     <section id="stake" className="relative mt-24 reveal" data-reveal>
-      <div className="container max-w-5xl">
+      <div className="container max-w-6xl">
         <div className="glass gradient-border p-6 md:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <h3 className="text-2xl font-extrabold">Stake</h3>
               <p className="text-foreground/80">
-                Stake your NPC tokens instantly. No duration lock â€” unstake
+                Stake your NPC tokens instantly. No duration lock — unstake
                 anytime.
               </p>
             </div>
-            {walletAddress ? (
-              <div className="text-right">
-                <div className="text-xs text-foreground/70">Wallet Connected</div>
-                <div className="font-mono font-semibold text-green-400">
-                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refreshData(true)}
+                disabled={isLoading}
+                className="glass"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {walletAddress ? (
+                <div className="text-right">
+                  <div className="text-xs text-foreground/70">Wallet Connected</div>
+                  <div className="font-mono font-semibold text-green-400">
+                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-right">
-                <div className="text-xs text-foreground/70">Connect wallet to start</div>
-                <div className="font-mono font-semibold text-foreground/60">
-                  Staking
+              ) : (
+                <div className="text-right">
+                  <div className="text-xs text-foreground/70">Connect wallet to start</div>
+                  <div className="font-mono font-semibold text-foreground/60">
+                    Staking
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {!walletAddress ? (
@@ -784,76 +919,192 @@ function StakeSimulator() {
             </div>
           ) : (
             <>
-          <div className="mt-6 grid md:grid-cols-2 gap-6 items-center">
-            <div>
-              <Label>Amount (NPC)</Label>
-              <div className="mt-2">
-                <Slider
-                  value={[amount]}
-                  min={0}
-                  max={sliderMax}
-                  step={1}
-                  onValueChange={(v) => setAmount(Math.max(0, v[0] ?? 0))}
-                />
-              </div>
-              <div className="mt-1 text-sm opacity-80">
-                {amount.toLocaleString()} NPC
-              </div>
-            </div>
+              {/* Staking Section */}
+              <div className="mt-8 grid lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div>
+                    <Label>Stake Amount (NPC)</Label>
+                    <div className="mt-2">
+                      <Slider
+                        value={[amount]}
+                        min={0}
+                        max={sliderMax}
+                        step={1000}
+                        onValueChange={(v) => setAmount(Math.max(0, v[0] ?? 0))}
+                      />
+                    </div>
+                    <div className="mt-1 text-sm opacity-80">
+                      {amount >= 1000000 ? `${(amount / 1000000).toFixed(3)}M NPC` : `${amount.toLocaleString()} NPC`}
+                    </div>
+                  </div>
+                  
+                  {/* Manual Input Field */}
+                  <div>
+                    <Label>Or enter amount manually</Label>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="number"
+                        value={amount || ''}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
+                          setAmount(Math.max(0, Math.min(value, sliderMax)));
+                        }}
+                        placeholder="Enter amount..."
+                        className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        min="0"
+                        max={sliderMax}
+                        step="1000"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="glass"
+                        onClick={() => setAmount(sliderMax)}
+                      >
+                        Max
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="btn-gradient w-full" 
+                    onClick={() => {
+                      console.log('🔘 STAKE BUTTON CLICKED!', { 
+                        isLoading, 
+                        poolPaused: poolData?.paused, 
+                        hasValidAmount, 
+                        amount,
+                        disabled: isLoading || poolData?.paused || !hasValidAmount 
+                      });
+                      handleStake();
+                    }}
+                    disabled={isLoading || poolData?.paused || !hasValidAmount}
+                  >
+                    {isLoading ? 'Processing...' : poolData?.paused ? 'Pool Paused' : 'Stake'}
+                  </Button>
+                </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-end">
-              <Button 
-                className="btn-gradient w-full sm:w-auto" 
-                onClick={() => {
-                  console.log('🔘 STAKE BUTTON CLICKED!', { 
-                    isLoading, 
-                    poolPaused: poolData?.paused, 
-                    hasValidAmount, 
-                    amount,
-                    disabled: isLoading || poolData?.paused || !hasValidAmount 
-                  });
-                  handleStake();
-                }}
-                disabled={isLoading || poolData?.paused || !hasValidAmount}
-              >
-                {isLoading ? 'Processing...' : poolData?.paused ? 'Pool Paused' : 'Stake'}
-              </Button>
-              <Button
-                variant="outline"
-                className="glass w-full sm:w-auto"
-                onClick={handleUnstake}
-                disabled={isLoading || !userData || userData.staked === 0 || !hasValidAmount}
-              >
-                Unstake
-              </Button>
-              <Button 
-                variant="secondary" 
-                className="w-full sm:w-auto"
-                onClick={handleClaim}
-                disabled={isLoading || !liveRewards || liveRewards.pendingUI === 0}
-              >
-                Claim Rewards
-              </Button>
-            </div>
-          </div>
+                {/* Unstaking Section */}
+                <div className="space-y-6">
+                  <div>
+                    <Label>Unstake Amount (NPC)</Label>
+                    <div className="mt-2">
+                      <Slider
+                        value={[unstakeAmount]}
+                        min={0}
+                        max={stakedTokens}
+                        step={1000}
+                        onValueChange={(v) => setUnstakeAmount(Math.max(0, v[0] ?? 0))}
+                      />
+                    </div>
+                    <div className="mt-1 text-sm opacity-80">
+                      {unstakeAmount >= 1000000 ? `${(unstakeAmount / 1000000).toFixed(3)}M NPC` : `${unstakeAmount.toLocaleString()} NPC`}
+                    </div>
+                  </div>
+                  
+                  {/* Manual Input Field for Unstaking */}
+                  <div>
+                    <Label>Or enter amount manually</Label>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        type="number"
+                        value={unstakeAmount || ''}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
+                          setUnstakeAmount(Math.max(0, Math.min(value, stakedTokens)));
+                        }}
+                        placeholder="Enter amount..."
+                        className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        min="0"
+                        max={stakedTokens}
+                        step="1000"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="glass"
+                        onClick={() => setUnstakeAmount(stakedTokens)}
+                        disabled={stakedTokens === 0}
+                      >
+                        Max
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Percentage Buttons */}
+                  <div className="grid grid-cols-4 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="glass text-xs"
+                      onClick={() => handleUnstakePercentage(25)}
+                      disabled={stakedTokens === 0}
+                    >
+                      25%
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="glass text-xs"
+                      onClick={() => handleUnstakePercentage(50)}
+                      disabled={stakedTokens === 0}
+                    >
+                      50%
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="glass text-xs"
+                      onClick={() => handleUnstakePercentage(75)}
+                      disabled={stakedTokens === 0}
+                    >
+                      75%
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="glass text-xs"
+                      onClick={() => handleUnstakePercentage(100)}
+                      disabled={stakedTokens === 0}
+                    >
+                      100%
+                    </Button>
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    className="glass w-full"
+                    onClick={handleUnstake}
+                    disabled={isLoading || !userData || userData.staked === 0 || !hasValidUnstakeAmount}
+                  >
+                    Unstake
+                  </Button>
+                </div>
+              </div>
 
-          <div className="mt-6 grid md:grid-cols-3 gap-4">
-            <MiniStat k="APR" v={aprDisplay} />
-            <MiniStat k="Staked" v={stakedDisplay} />
-            <MiniStat k="Rewards" v={rewardsDisplay} />
-          </div>
-        
-                    
-          {poolData?.paused && (
-            <div className="mt-4 text-sm text-yellow-400 text-center">
-              Pool is paused - staking is temporarily disabled
-            </div>
-          )}
-          {error && (
-            <div className="mt-6 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-              {error}
-            </div>
-          )}
+              {/* User Staking Info */}
+              {userData && (
+                <div className="mt-8 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <h4 className="text-lg font-semibold mb-3 text-gradient">Your Staking Info</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">{stakedDisplay}</div>
+                      <div className="text-sm text-foreground/70">Currently Staked</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {poolData?.paused && (
+                <div className="mt-4 text-sm text-yellow-400 text-center">
+                  Pool is paused - staking is temporarily disabled
+                </div>
+              )}
+              {error && (
+                <div className="mt-6 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                  {error}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -861,26 +1112,26 @@ function StakeSimulator() {
 
       {/* Custom Unstake Confirmation Dialog */}
       <AlertDialog open={showUnstakeConfirm} onOpenChange={setShowUnstakeConfirm}>
-        <AlertDialogContent className="glass gradient-border">
+        <AlertDialogContent className="bg-background border border-white/20 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gradient">Confirm Unstaking</AlertDialogTitle>
-            <AlertDialogDescription className="text-foreground/80">
-              You have {pendingRewardsValue.toFixed(6)} pending rewards.
+            <AlertDialogTitle className="text-2xl font-bold text-white">Confirm Unstaking</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300 text-lg">
+              You have <span className="text-blue-400 font-semibold">{pendingRewardsValue.toFixed(6)} NPC</span> pending rewards.
               <br /><br />
-              Unstaking will automatically claim these rewards first so you keep them.
+              Unstaking <span className="text-green-400 font-semibold">{unstakeAmount >= 1000000 ? `${(unstakeAmount / 1000000).toFixed(3)}M` : unstakeAmount.toLocaleString()} NPC</span> will automatically claim these rewards first so you keep them.
               <br /><br />
               Do you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-3">
             <AlertDialogCancel 
-              className="glass"
+              className="bg-gray-600 hover:bg-gray-700 text-white border-gray-500"
               onClick={() => setShowUnstakeConfirm(false)}
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              className="btn-gradient"
+              className="bg-red-600 hover:bg-red-700 text-white"
               onClick={handleConfirmUnstake}
             >
               Continue Unstaking
@@ -937,13 +1188,7 @@ function FAQ() {
             q="How do I get NPC tokens?"
             a="You can purchase NPC tokens on Solana DEXs like Raydium, Jupiter, or directly on pump.fun. Always DYOR before investing."
           />
-     
-          <QA
-            q="Is staking safe?"
-            a="This is a simulation platform for educational purposes. Always research any staking protocol thoroughly and never invest more than you can afford to lose."
-          />
-      
-          <QA
+               <QA
             q="What games can I play?"
             a="Games are unlocked based on your staking tier. Start with Cyber Defense and Pop Pop games. More games unlock with higher staking amounts."
           />
