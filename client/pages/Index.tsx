@@ -579,12 +579,16 @@ function Rewards() {
       ? `${rewardRatePerSecUi.toFixed(2)} NPC/sec`
       : `${rewardRatePerSecUi.toFixed(6)} NPC/sec`;
 
-  // Calculate estimated stakers (this is a simulation - in real implementation you'd track this)
+  // Calculate estimated stakers (contract doesn't track staker count, so we estimate)
   const totalStakedHuman = poolData 
     ? poolData.totalStaked / Math.pow(10, stakingDecimals)
     : 0;
+  
+  // Better estimation: assume average stake size of 500-2000 tokens per staker
+  // This gives a more realistic staker count
+  const averageStakeSize = Math.max(500, Math.min(2000, totalStakedHuman / 10)); // Dynamic average
   const estimatedStakers = totalStakedHuman > 0 
-    ? Math.max(1, Math.floor(totalStakedHuman / 1000)) // Rough estimate: 1 staker per 1000 tokens
+    ? Math.max(1, Math.floor(totalStakedHuman / averageStakeSize))
     : 0;
 
   return (
