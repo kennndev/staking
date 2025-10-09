@@ -13,9 +13,9 @@ const getEnv = (key: string, fallback = ""): string => {
 // Environment Configuration
 export const ENV = {
   // Solana Configuration
-  SOLANA_RPC_URL: getEnv("NEXT_PUBLIC_SOLANA_RPC_URL", "https://api.devnet.solana.com"),
-  PROGRAM_ID: getEnv("NEXT_PUBLIC_PROGRAM_ID", "4SumU3Q5bVZam6uTLpPdhtx9rYVazwJnWbJvajRf6U9V"),
-  ADMIN_WALLET: getEnv("NEXT_PUBLIC_ADMIN_WALLET", "FWqD9UHbEKKbCeAKNTFJRYkbr8VxhqabUd3nH3uJebMJ"),
+  SOLANA_RPC_URL: getEnv("NEXT_PUBLIC_SOLANA_RPC_URL", ""),
+  PROGRAM_ID: getEnv("NEXT_PUBLIC_PROGRAM_ID", ""),
+  ADMIN_WALLET: getEnv("NEXT_PUBLIC_ADMIN_WALLET", ""),
   MEMO_PROGRAM_ID: getEnv("NEXT_PUBLIC_MEMO_PROGRAM_ID", "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"),
 
   // Network Configuration
