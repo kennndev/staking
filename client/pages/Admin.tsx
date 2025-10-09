@@ -191,18 +191,35 @@ export default function Admin() {
   };
 
   const handleInitialisePool = async () => {
+    console.log('🏗️ Initialize Pool clicked!', { 
+      stakingMintInput, 
+      isLoading, 
+      walletAddress 
+    });
+    
     if (!stakingMintInput.trim()) {
+      console.log('❌ No staking mint provided');
       showWarning(
         "Missing staking mint",
         "Provide the staking mint address before initialising.",
       );
       return;
     }
+    
+    if (!walletAddress) {
+      console.log('❌ No wallet connected');
+      showWarning("Wallet Required", "Please connect your wallet first.");
+      return;
+    }
+    
     try {
+      console.log('🔄 Calling initializePool with:', stakingMintInput.trim());
       await initializePool(stakingMintInput.trim());
+      console.log('✅ Pool initialized successfully');
       showSuccess("Pool initialised", "Pool PDA and vault were created.");
       await refreshData();
     } catch (err) {
+      console.error('❌ Pool initialization failed:', err);
       showError(
         "Initialisation failed",
         err instanceof Error ? err.message : "Unable to initialise pool.",
