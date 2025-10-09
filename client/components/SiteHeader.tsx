@@ -87,14 +87,12 @@ export function SiteHeader() {
       <div id="scroll-progress" />
       <div className="container relative flex h-20 items-center justify-between">
         <a href="#home" className="inline-flex items-center gap-3">
-          <span
-            className="inline-block h-6 w-6 rounded-md"
-            style={{
-              background:
-                "linear-gradient(135deg, hsl(var(--solana-mint)), hsl(var(--solana-purple)))",
-            }}
+          <img
+            src="/favicon.ico"
+            alt="NPC Logo"
+            className="h-6 w-6 rounded-md"
           />
-          <span className="font-medium tracking-tight text-sm">NPC Stake</span>
+          <span className="font-medium tracking-tight text-sm">NPC</span>
         </a>
 
         {/* Desktop Navigation */}
@@ -154,7 +152,7 @@ export function SiteHeader() {
               </div>
               <Button size="sm" className="btn-gradient" onClick={() => handleNavigation('stake')}>
                 <Wallet className="mr-2" />
-                Stake
+                Staking
               </Button>
               <Button size="sm" variant="outline" className="glass" onClick={handleDisconnectWallet}>
                 Disconnect
