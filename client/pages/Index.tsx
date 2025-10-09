@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import useScrollReveal from "@/hooks/useScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -599,12 +599,12 @@ function Rewards() {
             </div>
             {/*<Metric
               label="Current APY"
-              value={`${apyPercent.toFixed(2)}%`}
+              value={isInitialLoad ? "Loading..." : `${apyPercent.toFixed(2)}%`}
               trend={apyPercent >= 0 ? "up" : "down"}
             />*/}
             <Metric
               label="Total Staked"
-              value={totalStakedUi}
+              value={isInitialLoad ? "Loading..." : totalStakedUi}
               trend={poolData && poolData.totalStaked > 0 ? "up" : "down"}
             />
             <Metric
@@ -614,7 +614,7 @@ function Rewards() {
             />
             {/*<Metric
               label="Rewards / sec"
-              value={rewardRateDisplay}
+              value={isInitialLoad ? "Loading..." : rewardRateDisplay}
               trend={rewardRatePerSecUi > 0 ? "up" : "down"}
             />*/}
           </div>
