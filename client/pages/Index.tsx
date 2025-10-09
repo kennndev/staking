@@ -579,17 +579,6 @@ function Rewards() {
       ? `${rewardRatePerSecUi.toFixed(2)} NPC/sec`
       : `${rewardRatePerSecUi.toFixed(6)} NPC/sec`;
 
-  // Calculate estimated stakers (contract doesn't track staker count, so we estimate)
-  const totalStakedHuman = poolData 
-    ? poolData.totalStaked / Math.pow(10, stakingDecimals)
-    : 0;
-  
-  // Better estimation: assume average stake size of 500-2000 tokens per staker
-  // This gives a more realistic staker count
-  const averageStakeSize = Math.max(500, Math.min(2000, totalStakedHuman / 10)); // Dynamic average
-  const estimatedStakers = totalStakedHuman > 0 
-    ? Math.max(1, Math.floor(totalStakedHuman / averageStakeSize))
-    : 0;
 
   return (
     <section id="rewards" className="relative mt-24 reveal" data-reveal>
@@ -613,11 +602,6 @@ function Rewards() {
               label="Total Staked"
               value={isInitialLoad ? "Loading..." : totalStakedUi}
               trend={poolData && poolData.totalStaked > 0 ? "up" : "down"}
-            />
-            <Metric
-              label="Active Stakers"
-              value={`${estimatedStakers.toLocaleString()}`}
-              trend={estimatedStakers > 0 ? "up" : "down"}
             />
             {/*<Metric
               label="Rewards / sec"
