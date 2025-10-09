@@ -4,7 +4,7 @@
     "installCommand": "npm ci",
     "buildCommand": "npm run build",
     "devCommand": "npm run dev",
-    "outputDirectory": "dist/spa",
+    "outputDirectory": "dist",
     "rewrites": [
       { "source": "/(.*)", "destination": "/index.html" }
     ],
