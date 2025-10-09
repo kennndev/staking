@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm run build:client",
-  "outputDirectory": "dist/spa",
+  "outputDirectory": "dist",
   "framework": "vite",
   "installCommand": "pnpm install --no-frozen-lockfile",
   "devCommand": "pnpm dev",
