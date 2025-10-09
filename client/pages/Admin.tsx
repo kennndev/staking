@@ -48,7 +48,6 @@ export default function Admin() {
     withdrawRewards,
     setAdmin,
     fetchAdmin,
-    setProgramAuthority,
     ensureVaults,
     closePool,
     refreshData,
@@ -70,7 +69,6 @@ export default function Admin() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [nextAdmin, setNextAdmin] = useState("");
   const [currentAdmin, setCurrentAdmin] = useState<string | null>(null);
-  const [newProgramAuthority, setNewProgramAuthority] = useState("");
   const [rewardVaultBalance, setRewardVaultBalance] = useState<
     number | null
   >(null);
@@ -407,25 +405,6 @@ export default function Admin() {
     }
   };
 
-  const handleTransferProgramAuthority = async () => {
-    if (!newProgramAuthority.trim()) {
-      showWarning("Missing address", "Enter a wallet to transfer program authority to.");
-      return;
-    }
-    try {
-      await setProgramAuthority(newProgramAuthority.trim());
-      showSuccess(
-        "Program Authority Transferred",
-        `Program upgrade authority transferred to: ${newProgramAuthority.slice(0, 4)}...${newProgramAuthority.slice(-4)}`,
-      );
-      setNewProgramAuthority("");
-    } catch (err) {
-      showError(
-        "Transfer failed",
-        err instanceof Error ? err.message : "Unable to transfer program authority.",
-      );
-    }
-  };
 
   const handleEnsureVaults = async () => {
     try {
@@ -863,114 +842,6 @@ export default function Admin() {
           </CardContent>
         </Card>
 
-          <Card className="group hover:scale-[1.02] transition-all duration-300 glass gradient-border">
-          <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <span className="text-2xl">👑</span>
-                Transfer admin
-              </CardTitle>
-            <CardDescription>
-              Assign pool administration privileges to another wallet.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-foreground/70">Current Admin</span>
-                <span className="font-mono text-sm">
-                  {currentAdmin 
-                    ? `${currentAdmin.slice(0, 4)}...${currentAdmin.slice(-4)}`
-                    : "Not fetched"
-                  }
-                </span>
-              </div>
-              <Button
-                variant="outline"
-                onClick={handleFetchAdmin}
-                disabled={isLoading}
-                className="w-full"
-              >
-                Fetch Current Admin
-              </Button>
-            </div>
-            
-            {walletAddress && (
-              <div className="space-y-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-blue-300">Your Connected Wallet</span>
-                  <span className="font-mono text-sm text-blue-400">
-                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-                  </span>
-                </div>
-                <Button
-                  variant="default"
-                  onClick={handleSetCurrentWalletAsAdmin}
-                  disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
-                >
-                  Set My Wallet as Admin
-                </Button>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <label className="text-sm text-foreground/70">Or enter custom admin address:</label>
-              <Input
-                value={nextAdmin}
-                onChange={(event) => setNextAdmin(event.target.value)}
-                placeholder="Custom admin wallet address"
-              />
-              <Button
-                variant="secondary"
-                onClick={handleTransferAdmin}
-                disabled={isLoading}
-                className="w-full"
-              >
-                Set Custom Admin
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-          <Card className="group hover:scale-[1.02] transition-all duration-300 glass gradient-border">
-          <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <span className="text-2xl">🔧</span>
-                Transfer Program Authority
-              </CardTitle>
-            <CardDescription>
-              Transfer the program upgrade authority to another wallet. This controls who can upgrade the program code.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-              <div className="flex items-center gap-2 text-yellow-300 text-sm">
-                <span className="text-lg">⚠️</span>
-                <span className="font-medium">Warning: This transfers ultimate control of the program</span>
-              </div>
-              <div className="text-xs text-yellow-200">
-                The new authority will be able to upgrade the program code. This action is irreversible unless the new authority transfers it back.
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm text-foreground/70">New Program Authority Wallet:</label>
-              <Input
-                value={newProgramAuthority}
-                onChange={(event) => setNewProgramAuthority(event.target.value)}
-                placeholder="Enter new program authority wallet address"
-              />
-              <Button
-                variant="destructive"
-                onClick={handleTransferProgramAuthority}
-                disabled={isLoading}
-                className="w-full"
-              >
-                Transfer Program Authority
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </section>
       </div>
     </div>

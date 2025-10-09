@@ -129,7 +129,6 @@ interface StakingContextType {
   withdrawRewards: (amount: number) => Promise<void>;
   setAdmin: (newAdmin: string) => Promise<void>;
   fetchAdmin: () => Promise<string | null>;
-  setProgramAuthority: (newAuthority: string) => Promise<void>;
   ensureVaults: () => Promise<void>;
   closeUser: () => Promise<void>;
   closePool: () => Promise<void>;
@@ -2595,55 +2594,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Transfer program upgrade authority
-  const setProgramAuthority = async (newAuthority: string): Promise<void> => {
-    if (!walletAddress) throw new Error('Wallet not connected');
-    
-    try {
-      console.log('🔄 Transferring program upgrade authority:', { 
-        programId: PROGRAM_ID.toBase58(),
-        currentAuthority: walletAddress,
-        newAuthority 
-      });
-      
-      // Import the required web3.js functions
-      const { 
-        Transaction, 
-        sendAndConfirmTransaction,
-        BPF_LOADER_UPGRADEABLE_PROGRAM_ID 
-      } = await import('@solana/web3.js');
-      
-      // Create the set upgrade authority instruction
-      const { setUpgradeAuthority } = await import('@solana/web3.js/src/programs/bpfUpgradeableLoader');
-      
-      const programId = PROGRAM_ID;
-      const newAuthorityPubkey = new PublicKey(newAuthority);
-      
-      const instruction = setUpgradeAuthority(
-        programId,
-        newAuthorityPubkey
-      );
-      
-      // Create and send transaction
-      const transaction = new Transaction().add(instruction);
-      
-      const signature = await sendAndConfirmTransaction(
-        connection,
-        transaction,
-        [], // No additional signers needed since wallet signs
-        {
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-        }
-      );
-      
-      console.log('✅ Program upgrade authority transferred successfully:', signature);
-      
-    } catch (e: any) {
-      console.error('❌ Failed to transfer program authority:', e);
-      throw new Error(`Failed to transfer program authority: ${e.message}`);
-    }
-  };
 
   // Admin function: ensure vaults exist
   const ensureVaults = async () => {
@@ -2840,7 +2790,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     withdrawRewards,
     setAdmin,
     fetchAdmin,
-    setProgramAuthority,
     ensureVaults,
     closeUser,
     closePool,
