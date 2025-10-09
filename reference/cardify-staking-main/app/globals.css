@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --sidebar-bg: #1a1a1a;
+  --card-bg: #1e1e1e;
+  --accent-yellow: #fbbf24;
+  --accent-orange: #f97316;
+  --accent-pink: #ec4899;
+  --accent-blue: #3b82f6;
+  --accent-teal: #14b8a6;
+  --accent-purple: #8b5cf6;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: linear-gradient(180deg, #1a0a2e 0%, #16213e 50%, #0f0f23 100%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  /* Mobile optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile-first responsive design */
+.dashboard-gradient {
+  background: linear-gradient(180deg, #1a0a2e 0%, #16213e 50%, #0f0f23 100%);
+  min-height: 100vh;
+}
+
+.sidebar-gradient {
+  background: linear-gradient(180deg, #1e1e1e 0%, #1a1a1a 100%);
+}
+
+.card-gradient {
+  background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  /* Improve touch targets */
+  button, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-padding {
+    padding: 1rem;
+  }
+  
+  /* Mobile-friendly cards */
+  .mobile-card {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  
+  /* Mobile navigation */
+  .mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(26, 26, 26, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Mobile sidebar overlay */
+  .mobile-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    background: linear-gradient(180deg, #1e1e1e 0%, #1a1a1a 100%);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .mobile-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .desktop-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Touch-friendly interactions */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Improved focus states for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling for mobile */
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Custom dark theme styles for form elements */
+select {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  color: white !important;
+}
+
+select option {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  color: white !important;
+}
+
+/* Ensure input fields have dark backgrounds */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"],
+textarea {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  color: white !important;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+  color: rgb(156, 163, 175) !important;
+}
+
+/* Wallet address overflow handling */
+.wallet-address {
+  word-break: break-all;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Ensure long text wraps properly */
+.break-long-text {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}

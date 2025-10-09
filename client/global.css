@@ -1,0 +1,348 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   */
+  :root {
+    /* Near-black background inspired by Apple dark pages */
+    --background: 230 8% 6%;
+    --foreground: 220 15% 96%;
+
+    --card: 230 8% 8%;
+    --card-foreground: 220 15% 96%;
+
+    --popover: 230 8% 6%;
+    --popover-foreground: 220 15% 96%;
+
+    /* Brand colors tuned for Solana-esque neon accent */
+    --brand: 263 90% 65%;
+    --brand-foreground: 220 15% 96%;
+
+    --primary: var(--brand);
+    --primary-foreground: var(--brand-foreground);
+
+    --secondary: 230 10% 14%;
+    --secondary-foreground: 220 15% 96%;
+
+    --muted: 230 10% 14%;
+    --muted-foreground: 220 15% 86%;
+
+    --accent: 263 90% 65%;
+    --accent-foreground: 220 15% 96%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 220 15% 96%;
+
+    --border: 230 8% 12%;
+    --input: 230 8% 10%;
+    --ring: 263 90% 65%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 230 7% 7%;
+    --sidebar-foreground: 220 15% 96%;
+
+    --solana-mint: 170 94% 40%;
+    --solana-purple: 268 86% 64%;
+    --solana-pink: 330 92% 60%;
+  }
+
+  .dark {
+    /* keep the same for dark mode (explicit) */
+    --background: 230 8% 6%;
+    --foreground: 220 15% 96%;
+
+    --card: 230 8% 8%;
+    --card-foreground: 220 15% 96%;
+
+    --popover: 230 8% 6%;
+    --popover-foreground: 220 15% 96%;
+
+    --brand: 263 90% 70%;
+    --brand-foreground: 220 15% 96%;
+
+    --primary: var(--brand);
+    --primary-foreground: var(--brand-foreground);
+
+    --secondary: 230 10% 14%;
+    --secondary-foreground: 220 15% 96%;
+
+    --muted: 230 10% 14%;
+    --muted-foreground: 220 15% 86%;
+
+    --accent: 263 90% 70%;
+    --accent-foreground: 220 15% 96%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 220 15% 96%;
+
+    --border: 230 8% 12%;
+    --input: 230 8% 10%;
+    --ring: 263 90% 65%;
+
+    --sidebar-background: 230 7% 7%;
+    --sidebar-foreground: 220 15% 96%;
+
+    --solana-mint: 170 94% 40%;
+    --solana-purple: 268 86% 64%;
+    --solana-pink: 330 92% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground;
+    background-image:
+      radial-gradient(
+        800px 400px at 10% -20%,
+        hsl(var(--solana-purple) / 0.06),
+        transparent 50%
+      ),
+      radial-gradient(
+        600px 300px at 110% 10%,
+        hsl(var(--solana-mint) / 0.05),
+        transparent 40%
+      ),
+      radial-gradient(
+        900px 450px at -10% 120%,
+        hsl(var(--solana-pink) / 0.04),
+        transparent 40%
+      );
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+    color-scheme: dark;
+    font-family:
+      "Space Grotesk",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--solana-mint)),
+      hsl(var(--solana-purple)) 50%,
+      hsl(var(--solana-pink))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* coin fracture pieces */
+  .coin-piece {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    transform-origin: 50% 50%;
+    transition:
+      transform 600ms cubic-bezier(0.2, 0.9, 0.2, 1),
+      opacity 600ms ease;
+    will-change: transform, opacity;
+    pointer-events: none;
+    background: conic-gradient(
+      from 0deg,
+      hsl(var(--solana-mint)),
+      hsl(var(--solana-purple)),
+      hsl(var(--solana-pink))
+    );
+    overflow: visible;
+  }
+  .coin-base {
+    transition:
+      opacity 400ms ease,
+      transform 300ms ease;
+  }
+  .coin-shard {
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    border-radius: 9999px;
+    background: inherit;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6);
+    transition:
+      transform 700ms cubic-bezier(0.2, 0.9, 0.2, 1),
+      opacity 700ms ease;
+  }
+  .coin-shard.show {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  .btn-gradient {
+    background-image: linear-gradient(
+      90deg,
+      hsl(var(--solana-mint)),
+      hsl(var(--solana-purple)) 50%,
+      hsl(var(--solana-pink))
+    );
+    color: white;
+  }
+  .glass {
+    @apply bg-white/10 dark:bg-white/20 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+  .nav-link {
+    @apply text-sm text-foreground/70 hover:text-foreground transition-colors;
+  }
+
+  /* reveal-on-scroll helpers */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px) scale(0.995);
+    transition:
+      opacity 700ms cubic-bezier(0.2, 0.9, 0.2, 1),
+      transform 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
+    will-change: opacity, transform;
+  }
+  .reveal--visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@layer utilities {
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border:before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--solana-mint)),
+      hsl(var(--solana-purple)) 50%,
+      hsl(var(--solana-pink))
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* parallax helper for orbs/layers */
+  .parallax-layer {
+    will-change: transform;
+    transition: transform 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  }
+
+  /* Apple-style big-section spacing */
+  .apple-section {
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+
+  /* Scroll snapping and hero pin effect */
+  :root {
+    --scroll-progress: 0;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  main,
+  body {
+    scroll-snap-type: y proximity;
+  }
+  section {
+    scroll-snap-align: start;
+  }
+  .hero-wrapper {
+    height: 200vh; /* pin duration */
+    position: relative;
+  }
+  .hero-content {
+    position: sticky;
+    top: 6rem;
+    height: calc(100vh - 6rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    will-change: transform, opacity;
+  }
+
+  /* subtle parallax driven by --scroll-progress (0..1) */
+  .parallax-coin {
+    transform: translateY(calc(var(--scroll-progress) * -24px))
+      rotate(calc(var(--scroll-progress) * 12deg));
+    transition: transform 160ms linear;
+  }
+
+  /* scroll progress bar */
+  #scroll-progress {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 3px;
+    width: 100%;
+    pointer-events: none;
+    z-index: 60;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--solana-mint)),
+      hsl(var(--solana-purple)),
+      hsl(var(--solana-pink))
+    );
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform 120ms linear;
+  }
+
+  /* Mobile overrides */
+  @media (max-width: 768px) {
+    .hero-wrapper {
+      height: auto;
+    }
+    .hero-content {
+      position: static;
+      top: auto;
+      height: auto;
+      padding: 4rem 0;
+    }
+    #scroll-progress {
+      display: none;
+    }
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .parallax-coin {
+      transform: none !important;
+    }
+    .glass {
+      padding: 1rem;
+    }
+  }
+}
