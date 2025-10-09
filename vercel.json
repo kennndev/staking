@@ -4,12 +4,12 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist/spa"
       }
     }
   ],
   "buildCommand": "npm run build:client",
-  "outputDirectory": "dist",
+  "outputDirectory": "dist/spa",
   "rewrites": [
     {
       "source": "/(.*)",
