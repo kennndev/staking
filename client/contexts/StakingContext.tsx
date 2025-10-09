@@ -663,7 +663,12 @@ export function StakingProvider({ children }: { children: ReactNode }) {
   // --- Actions ---------------------------------------------------------------
 
   const initializePool = async (stakingMint: string) => {
-    if (!isAdmin || !walletAddress) throw new Error('Only admin can initialize pool');
+    if (!walletAddress) throw new Error('Wallet not connected');
+    
+    // Allow initialization if no pool exists (new contract) OR if user is admin
+    if (poolData && !isAdmin) {
+      throw new Error('Only admin can initialize pool');
+    }
 
     setIsLoading(true); 
     setError(null);
