@@ -1084,12 +1084,20 @@ function StakeSimulator() {
 
               {/* User Staking Info */}
               {userData && (
-                <div className="mt-8 p-4 bg-white/5 rounded-lg border border-white/10">
-                  <h4 className="text-lg font-semibold mb-3 text-gradient">Your Staking Info</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-400">{stakedDisplay}</div>
-                      <div className="text-sm text-foreground/70">Currently Staked</div>
+                <div className="mt-8 p-6 bg-white/5 rounded-lg border border-white/10">
+                  <h4 className="text-xl font-semibold mb-6 text-gradient text-center">Your Staking Info</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-3xl font-bold text-green-400 mb-2">{stakedDisplay}</div>
+                      <div className="text-sm text-foreground/70 font-medium">Currently Staked</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-3xl font-bold text-blue-400 mb-2">{rewardsDisplay}</div>
+                      <div className="text-sm text-foreground/70 font-medium">Pending Rewards</div>
+                    </div>
+                    <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="text-3xl font-bold text-purple-400 mb-2">{aprDisplay}</div>
+                      <div className="text-sm text-foreground/70 font-medium">Current APR</div>
                     </div>
                   </div>
                 </div>
