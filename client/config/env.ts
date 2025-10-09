@@ -32,8 +32,6 @@ export const ENV = {
     "Professional Solana staking dashboard for NPC token",
   ),
 
-  // OpenAI Configuration
-  OPENAI_API_KEY: getEnv("NEXT_PUBLIC_OPENAI_API_KEY", ""),
 
   // Supabase Configuration
   SUPABASE_URL: getEnv("NEXT_PUBLIC_SUPABASE_URL", ""),
