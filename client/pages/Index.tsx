@@ -580,8 +580,11 @@ function Rewards() {
       : `${rewardRatePerSecUi.toFixed(6)} NPC/sec`;
 
   // Calculate estimated stakers (this is a simulation - in real implementation you'd track this)
-  const estimatedStakers = poolData && poolData.totalStaked > 0 
-    ? Math.max(1, Math.floor(poolData.totalStaked / 1000)) // Rough estimate
+  const totalStakedHuman = poolData 
+    ? poolData.totalStaked / Math.pow(10, stakingDecimals)
+    : 0;
+  const estimatedStakers = totalStakedHuman > 0 
+    ? Math.max(1, Math.floor(totalStakedHuman / 1000)) // Rough estimate: 1 staker per 1000 tokens
     : 0;
 
   return (
