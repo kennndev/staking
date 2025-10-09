@@ -24,8 +24,9 @@ export function usePendingRewards(pool: any, user: any, now = Math.floor(Date.no
 
     // 1. extend accumulator
     const dt = BigInt(Math.max(0, now - pool.lastUpdateTs));
-    const acc = BigInt(pool.accScaled) +
-                dt * BigInt(pool.rewardRatePerSec) * SCALAR / BigInt(pool.totalStaked);
+    const acc = pool.totalStaked > 0 
+      ? BigInt(pool.accScaled) + dt * BigInt(pool.rewardRatePerSec) * SCALAR / BigInt(pool.totalStaked)
+      : BigInt(pool.accScaled);
 
     // 2. pending = (staked * acc / SCALAR) − debt + carry
     const due = (BigInt(user.staked) * acc / SCALAR)
@@ -36,8 +37,9 @@ export function usePendingRewards(pool: any, user: any, now = Math.floor(Date.no
     const pendingUI = Number(due) / 10 ** decimals;
     const yearlyRewards = Number(BigInt(pool.rewardRatePerSec) * BigInt(SECS_PER_YEAR))
                           / 10 ** decimals;
-    const apy = pool.totalStaked > 0
-                ? (yearlyRewards / (pool.totalStaked / 10 ** (pool.stakeDecimals ?? 6))) * 100
+    const totalStakedUI = pool.totalStaked / 10 ** (pool.stakeDecimals ?? 6);
+    const apy = totalStakedUI > 0
+                ? (yearlyRewards / totalStakedUI) * 100
                 : 0;
 
     return { pendingUI, apy };
