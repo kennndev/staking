@@ -69,6 +69,7 @@ export default function Admin() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [nextAdmin, setNextAdmin] = useState("");
   const [currentAdmin, setCurrentAdmin] = useState<string | null>(null);
+  const [newProgramAuthority, setNewProgramAuthority] = useState("");
   const [rewardVaultBalance, setRewardVaultBalance] = useState<
     number | null
   >(null);
@@ -402,6 +403,27 @@ export default function Admin() {
         "Transfer failed",
         err instanceof Error ? err.message : "Unable to set new admin.",
       );
+    }
+  };
+
+  const handleTransferProgramAuthority = async () => {
+    if (!newProgramAuthority.trim()) {
+      showWarning("Missing address", "Enter a wallet to transfer program authority to.");
+      return;
+    }
+    
+    // Show CLI command instead of trying to execute it
+    const cliCommand = `solana program set-upgrade-authority CG7e3BfRFQn1AVUdXFRUsQBiKHtSpCiH7afhpJaoE4PT ${newProgramAuthority.trim()}`;
+    
+    showInfo(
+      "CLI Command Required",
+      `To transfer program authority, run this command in your terminal:\n\n${cliCommand}\n\nThis requires the current authority's private key.`
+    );
+    
+    // Copy to clipboard if possible
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(cliCommand);
+      showSuccess("Command Copied", "CLI command copied to clipboard!");
     }
   };
 
@@ -842,6 +864,45 @@ export default function Admin() {
           </CardContent>
         </Card>
 
+          <Card className="group hover:scale-[1.02] transition-all duration-300 glass gradient-border">
+          <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <span className="text-2xl">🔧</span>
+                Transfer Program Authority
+              </CardTitle>
+            <CardDescription>
+              Transfer the program upgrade authority to another wallet. This controls who can upgrade the program code.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+              <div className="flex items-center gap-2 text-yellow-300 text-sm">
+                <span className="text-lg">⚠️</span>
+                <span className="font-medium">Warning: This transfers ultimate control of the program</span>
+              </div>
+              <div className="text-xs text-yellow-200">
+                The new authority will be able to upgrade the program code. This action is irreversible unless the new authority transfers it back.
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70">New Program Authority Wallet:</label>
+              <Input
+                value={newProgramAuthority}
+                onChange={(event) => setNewProgramAuthority(event.target.value)}
+                placeholder="Enter new program authority wallet address"
+              />
+              <Button
+                variant="destructive"
+                onClick={handleTransferProgramAuthority}
+                disabled={isLoading}
+                className="w-full"
+              >
+                Generate CLI Command
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </section>
       </div>
     </div>
