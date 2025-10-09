@@ -653,6 +653,7 @@ function StakeSimulator() {
     claim,
     stakingDecimals,
     refreshData,
+    connection,
   } = useStaking();
 
   const { showSuccess, showError, showWarning } = useNotifications();
@@ -660,6 +661,7 @@ function StakeSimulator() {
   const [amount, setAmount] = useState<number>(0);
   const [unstakeAmount, setUnstakeAmount] = useState<number>(0);
   const [showUnstakeConfirm, setShowUnstakeConfirm] = useState(false);
+  const [userTokenBalance, setUserTokenBalance] = useState<number>(0);
 
   const stakedTokens =
     userData && stakingDecimals >= 0
@@ -667,7 +669,7 @@ function StakeSimulator() {
       : 0;
 
   const sliderMax = Math.max(
-    50536000, // 50.536M NPC
+    userTokenBalance, // Use user's actual balance
     Math.min(50_000_000, stakedTokens > 0 ? Math.ceil(stakedTokens * 2) : 0)
   );
 
@@ -692,6 +694,41 @@ function StakeSimulator() {
     const percentageAmount = (stakedTokens * percentage) / 100;
     setUnstakeAmount(percentageAmount);
   };
+
+  // Fetch user's token balance
+  const fetchUserTokenBalance = async () => {
+    if (!walletAddress || !poolData) return;
+    
+    try {
+      const { getAssociatedTokenAddress } = await import('@solana/spl-token');
+      const { PublicKey } = await import('@solana/web3.js');
+      
+      // Get user's token account address
+      const userTokenAccount = await getAssociatedTokenAddress(
+        new PublicKey(poolData.stakingMint),
+        new PublicKey(walletAddress)
+      );
+      
+      // Fetch token account balance
+      const balance = await connection.getTokenAccountBalance(userTokenAccount);
+      
+      if (balance.value.uiAmount !== null) {
+        setUserTokenBalance(balance.value.uiAmount);
+      } else {
+        setUserTokenBalance(0);
+      }
+    } catch (error) {
+      console.log('Could not fetch token balance:', error);
+      setUserTokenBalance(0);
+    }
+  };
+
+  // Fetch token balance when wallet connects or pool data changes
+  useEffect(() => {
+    if (walletAddress && poolData) {
+      fetchUserTokenBalance();
+    }
+  }, [walletAddress, poolData]);
 
   const handleStake = async () => {
     if (!walletAddress) {
@@ -865,21 +902,21 @@ function StakeSimulator() {
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
-              {walletAddress ? (
-                <div className="text-right">
-                  <div className="text-xs text-foreground/70">Wallet Connected</div>
-                  <div className="font-mono font-semibold text-green-400">
-                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-                  </div>
+            {walletAddress ? (
+              <div className="text-right">
+                <div className="text-xs text-foreground/70">Wallet Connected</div>
+                <div className="font-mono font-semibold text-green-400">
+                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
                 </div>
-              ) : (
-                <div className="text-right">
-                  <div className="text-xs text-foreground/70">Connect wallet to start</div>
-                  <div className="font-mono font-semibold text-foreground/60">
-                    Staking
-                  </div>
+              </div>
+            ) : (
+              <div className="text-right">
+                <div className="text-xs text-foreground/70">Connect wallet to start</div>
+                <div className="font-mono font-semibold text-foreground/60">
+                  Staking
                 </div>
-              )}
+              </div>
+            )}
             </div>
           </div>
 
@@ -896,24 +933,47 @@ function StakeSimulator() {
           ) : (
             <>
               {/* Staking Section */}
-              <div className="mt-8 grid lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <Label>Stake Amount (NPC)</Label>
-                    <div className="mt-2">
-                      <Slider
-                        value={[amount]}
-                        min={0}
-                        max={sliderMax}
-                        step={1000}
-                        onValueChange={(v) => setAmount(Math.max(0, v[0] ?? 0))}
-                      />
+              <div className="mt-8 grid lg:grid-cols-2 gap-8 relative">
+                {/* Loading Overlay */}
+                {isLoading && (
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+                    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6 border border-white/20">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent"></div>
+                        <div className="text-white font-medium">Processing transaction...</div>
+                        <div className="text-white/70 text-sm">Please wait while we process your request</div>
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm opacity-80">
-                      {amount >= 1000000 ? `${(amount / 1000000).toFixed(3)}M NPC` : `${amount.toLocaleString()} NPC`}
+                  </div>
+                )}
+                <div className="space-y-6">
+                  {/* User's Available Balance */}
+                  <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-sm text-foreground/70 mb-1">Your Available Balance</div>
+                    <div className="text-lg font-semibold text-green-400">
+                      {userTokenBalance >= 1000000 
+                        ? `${(userTokenBalance / 1000000).toFixed(3)}M NPC` 
+                        : `${userTokenBalance.toLocaleString()} NPC`
+                      }
                     </div>
                   </div>
                   
+            <div>
+                    <Label>Stake Amount (NPC)</Label>
+              <div className="mt-2">
+                <Slider
+                  value={[amount]}
+                  min={0}
+                  max={sliderMax}
+                        step={1000}
+                  onValueChange={(v) => setAmount(Math.max(0, v[0] ?? 0))}
+                />
+              </div>
+              <div className="mt-1 text-sm opacity-80">
+                      {amount >= 1000000 ? `${(amount / 1000000).toFixed(3)}M NPC` : `${amount.toLocaleString()} NPC`}
+              </div>
+            </div>
+
                   {/* Manual Input Field */}
                   <div>
                     <Label>Or enter amount manually</Label>
@@ -923,7 +983,7 @@ function StakeSimulator() {
                         value={amount || ''}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value) || 0;
-                          setAmount(Math.max(0, Math.min(value, sliderMax)));
+                          setAmount(Math.max(0, Math.min(value, userTokenBalance)));
                         }}
                         placeholder="Enter amount..."
                         className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -931,11 +991,12 @@ function StakeSimulator() {
                         max={sliderMax}
                         step="1000"
                       />
-                      <Button
+              <Button 
                         variant="outline"
                         size="sm"
                         className="glass"
-                        onClick={() => setAmount(sliderMax)}
+                        onClick={() => setAmount(userTokenBalance)}
+                        disabled={userTokenBalance === 0}
                       >
                         Max
                       </Button>
@@ -943,13 +1004,22 @@ function StakeSimulator() {
                   </div>
                   
                   <Button 
-                    className="btn-gradient w-full" 
+                    className="btn-gradient w-full relative" 
                     onClick={() => {
-                                          handleStake();
+                      handleStake();
                     }}
                     disabled={isLoading || poolData?.paused || !hasValidAmount}
                   >
-                    {isLoading ? 'Processing...' : poolData?.paused ? 'Pool Paused' : 'Stake'}
+                    {isLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <span>Staking...</span>
+                      </div>
+                    ) : poolData?.paused ? (
+                      'Pool Paused'
+                    ) : (
+                      'Stake'
+                    )}
                   </Button>
                 </div>
 
@@ -988,21 +1058,21 @@ function StakeSimulator() {
                         max={stakedTokens}
                         step="1000"
                       />
-                      <Button
-                        variant="outline"
+              <Button
+                variant="outline"
                         size="sm"
                         className="glass"
                         onClick={() => setUnstakeAmount(stakedTokens)}
                         disabled={stakedTokens === 0}
                       >
                         Max
-                      </Button>
+              </Button>
                     </div>
                   </div>
                   
                   {/* Percentage Buttons */}
                   <div className="grid grid-cols-4 gap-2">
-                    <Button
+              <Button 
                       variant="outline"
                       size="sm"
                       className="glass text-xs"
@@ -1042,14 +1112,21 @@ function StakeSimulator() {
                   
                   <Button
                     variant="outline"
-                    className="glass w-full"
+                    className="glass w-full relative"
                     onClick={handleUnstake}
                     disabled={isLoading || !userData || userData.staked === 0 || !hasValidUnstakeAmount}
                   >
-                    Unstake
+                    {isLoading ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        <span>Unstaking...</span>
+                      </div>
+                    ) : (
+                      'Unstake'
+                    )}
                   </Button>
-                </div>
-              </div>
+            </div>
+          </div>
 
               {/* User Staking Info */}
               {userData && (
@@ -1059,7 +1136,7 @@ function StakeSimulator() {
                     <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="text-3xl font-bold text-green-400 mb-2">{stakedDisplay}</div>
                       <div className="text-sm text-foreground/70 font-medium">Currently Staked</div>
-                    </div>
+          </div>
                     {/*<div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="text-3xl font-bold text-blue-400 mb-2">{rewardsDisplay}</div>
                       <div className="text-sm text-foreground/70 font-medium">Pending Rewards</div>
@@ -1071,12 +1148,12 @@ function StakeSimulator() {
                   </div>
                 </div>
               )}
-
-              {poolData?.paused && (
-                <div className="mt-4 text-sm text-yellow-400 text-center">
-                  Pool is paused - staking is temporarily disabled
-                </div>
-              )}
+                    
+          {poolData?.paused && (
+            <div className="mt-4 text-sm text-yellow-400 text-center">
+              Pool is paused - staking is temporarily disabled
+            </div>
+          )}
             </>
           )}
         </div>
@@ -1164,7 +1241,7 @@ function FAQ() {
             q="How do I get NPC tokens?"
             a="You can purchase NPC tokens on Solana DEXs like Raydium, Jupiter, pump.fun or directly on Dexscreener. Always DYOR before investing."
           />
-               <QA
+          <QA
             q="What games can I play?"
             a="Games are unlocked based on your staking tier. Start with Cyber Defense and Pop Pop games. More games unlock with higher staking amounts."
           />
