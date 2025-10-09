@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import useScrollReveal from "@/hooks/useScrollReveal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -469,7 +469,7 @@ function HowItWorks() {
 }
 
 function Rewards() {
-  const { poolData, userData, stakingDecimals, rewardDecimals } = useStaking();
+  const { poolData, userData, stakingDecimals, rewardDecimals, isInitialLoad } = useStaking();
   const liveRewards = usePendingRewards(poolData, userData);
 
   const apyPercent = liveRewards?.apy ?? 0;
@@ -486,12 +486,17 @@ function Rewards() {
       ? `${rewardRatePerSecUi.toFixed(2)} NPC/sec`
       : `${rewardRatePerSecUi.toFixed(6)} NPC/sec`;
 
+  // Calculate estimated stakers (this is a simulation - in real implementation you'd track this)
+  const estimatedStakers = poolData && poolData.totalStaked > 0 
+    ? Math.max(1, Math.floor(poolData.totalStaked / 1000)) // Rough estimate
+    : 0;
+
   return (
     <section id="rewards" className="relative mt-24 reveal" data-reveal>
       <GlowOrbs />
       <div className="container">
         <div className="glass gradient-border p-6 md:p-8 reveal" data-reveal>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-center">
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 items-center">
             <div>
               <h3 className="text-2xl font-extrabold">Dynamic Rewards</h3>
               <p className="text-foreground/80 mt-2">
@@ -501,17 +506,22 @@ function Rewards() {
             </div>
             <Metric
               label="Current APY"
-              value={`${apyPercent.toFixed(2)}%`}
+              value={isInitialLoad ? "Loading..." : `${apyPercent.toFixed(2)}%`}
               trend={apyPercent >= 0 ? "up" : "down"}
             />
             <Metric
               label="Total Staked"
-              value={totalStakedUi}
+              value={isInitialLoad ? "Loading..." : totalStakedUi}
               trend={poolData && poolData.totalStaked > 0 ? "up" : "down"}
             />
             <Metric
+              label="Active Stakers"
+              value={isInitialLoad ? "Loading..." : `${estimatedStakers.toLocaleString()}`}
+              trend={estimatedStakers > 0 ? "up" : "down"}
+            />
+            <Metric
               label="Rewards / sec"
-              value={rewardRateDisplay}
+              value={isInitialLoad ? "Loading..." : rewardRateDisplay}
               trend={rewardRatePerSecUi > 0 ? "up" : "down"}
             />
           </div>
@@ -552,11 +562,13 @@ function StakeSimulator() {
     poolData,
     userData,
     isLoading,
+    isInitialLoad,
     error,
     stake,
     unstake,
     claim,
     stakingDecimals,
+    refreshData,
   } = useStaking();
 
   const { showSuccess, showError, showWarning } = useNotifications();
@@ -755,21 +767,33 @@ function StakeSimulator() {
                 anytime.
               </p>
             </div>
-            {walletAddress ? (
-              <div className="text-right">
-                <div className="text-xs text-foreground/70">Wallet Connected</div>
-                <div className="font-mono font-semibold text-green-400">
-                  {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refreshData(true)}
+                disabled={isLoading}
+                className="glass"
+              >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {walletAddress ? (
+                <div className="text-right">
+                  <div className="text-xs text-foreground/70">Wallet Connected</div>
+                  <div className="font-mono font-semibold text-green-400">
+                    {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-right">
-                <div className="text-xs text-foreground/70">Connect wallet to start</div>
-                <div className="font-mono font-semibold text-foreground/60">
-                  Staking
+              ) : (
+                <div className="text-right">
+                  <div className="text-xs text-foreground/70">Connect wallet to start</div>
+                  <div className="font-mono font-semibold text-foreground/60">
+                    Staking
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {!walletAddress ? (
@@ -838,9 +862,9 @@ function StakeSimulator() {
           </div>
 
           <div className="mt-6 grid md:grid-cols-3 gap-4">
-            <MiniStat k="APR" v={aprDisplay} />
-            <MiniStat k="Staked" v={stakedDisplay} />
-            <MiniStat k="Rewards" v={rewardsDisplay} />
+            <MiniStat k="APR" v={isInitialLoad ? "Loading..." : aprDisplay} />
+            <MiniStat k="Staked" v={isInitialLoad ? "Loading..." : stakedDisplay} />
+            <MiniStat k="Rewards" v={isInitialLoad ? "Loading..." : rewardsDisplay} />
           </div>
         
                     
