@@ -219,7 +219,6 @@ export default function Admin() {
       showSuccess("Pool initialised", "Pool PDA and vault were created.");
       await refreshData();
     } catch (err) {
-      console.error('❌ Pool initialization failed:', err);
       showError(
         "Initialisation failed",
         err instanceof Error ? err.message : "Unable to initialise pool.",
@@ -424,10 +423,8 @@ export default function Admin() {
   };
 
   const handleTransferProgramAuthority = async () => {
-    console.log('🔧 Generate CLI Command clicked!', { newProgramAuthority });
     
     if (!newProgramAuthority.trim()) {
-      console.log('❌ No authority address provided');
       showWarning("Missing address", "Enter a wallet to transfer program authority to.");
       return;
     }
@@ -435,7 +432,6 @@ export default function Admin() {
     // Show CLI command instead of trying to execute it
     const cliCommand = `solana program set-upgrade-authority CG7e3BfRFQn1AVUdXFRUsQBiKHtSpCiH7afhpJaoE4PT ${newProgramAuthority.trim()}`;
     
-    console.log('📋 Generated CLI command:', cliCommand);
     
     showInfo(
       "CLI Command Required",
@@ -446,14 +442,11 @@ export default function Admin() {
     if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(cliCommand);
-        console.log('✅ Command copied to clipboard');
         showSuccess("Command Copied", "CLI command copied to clipboard!");
       } catch (err) {
-        console.error('❌ Failed to copy to clipboard:', err);
         showError("Copy Failed", "Could not copy to clipboard. Please copy manually.");
       }
     } else {
-      console.log('❌ Clipboard not available');
       showWarning("Copy Failed", "Clipboard not available. Please copy the command manually.");
     }
   };
@@ -503,7 +496,6 @@ export default function Admin() {
       await refreshData();
       showInfo("Refreshed", "Fetched the latest on-chain state.");
     } catch (err) {
-      console.error("Refresh failed:", err);
     }
   };
 

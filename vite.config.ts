@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => ({
       allow: ["./", "./client"],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**"],
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     outDir: "dist",

@@ -70,7 +70,9 @@ export default function GamesSection() {
   // Helper function to check if user can access a game
   const canAccessGame = (game: Game): boolean => {
     if (!game.isAvailable) return false;
-    return userStakedAmount >= game.stakingRequirement;
+    // Temporarily commented out staking requirement
+    // return userStakedAmount >= game.stakingRequirement;
+    return true; // Allow access to all available games
   };
 
   // Helper function to get user's current tier
@@ -118,47 +120,49 @@ export default function GamesSection() {
           </div>
         </div>
       );
-    } else if (game && !canAccessGame(game)) {
-      // Show access denied message
-      return (
-        <div>
-          <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 mb-6">
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleBackToGames}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <span className="text-2xl">{game.icon}</span>
-              <h1 className="text-2xl font-bold text-white">{game.name}</h1>
-            </div>
-          </div>
+    } 
+    // Temporarily commented out access denied logic
+    // else if (game && !canAccessGame(game)) {
+    //   // Show access denied message
+    //   return (
+    //     <div>
+    //       <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-4 mb-6">
+    //         <div className="flex items-center space-x-3">
+    //           <button
+    //             onClick={handleBackToGames}
+    //             className="p-2 text-gray-400 hover:text-white transition-colors"
+    //           >
+    //             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    //               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    //             </svg>
+    //           </button>
+    //           <span className="text-2xl">{game.icon}</span>
+    //           <h1 className="text-2xl font-bold text-white">{game.name}</h1>
+    //         </div>
+    //       </div>
 
-          <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-6 text-center">
-            <div className="text-6xl mb-4">🔒</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Access Restricted</h2>
-            <p className="text-gray-300 mb-6">
-              You need to stake at least <span className="font-bold text-yellow-400">
-                {formatStakingRequirement(game.stakingRequirement)} tokens
-              </span> to access this game.
-            </p>
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
-              <p className="text-yellow-400 text-sm">
-                Current staked: <span className="font-bold">
-                  {stakingDecimals > 0 
-                    ? (userStakedAmount / Math.pow(10, stakingDecimals)).toLocaleString()
-                    : userStakedAmount.toLocaleString()
-                  } tokens
-                </span>
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
+    //       <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-6 text-center">
+    //         <div className="text-6xl mb-4">🔒</div>
+    //         <h2 className="text-2xl font-bold text-white mb-4">Access Restricted</h2>
+    //         <p className="text-gray-300 mb-6">
+    //           You need to stake at least <span className="font-bold text-yellow-400">
+    //             {formatStakingRequirement(game.stakingRequirement)} tokens
+    //           </span> to access this game.
+    //         </p>
+    //         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+    //           <p className="text-yellow-400 text-sm">
+    //             Current staked: <span className="font-bold">
+    //               {stakingDecimals > 0 
+    //                 ? (userStakedAmount / Math.pow(10, stakingDecimals)).toLocaleString()
+    //                 : userStakedAmount.toLocaleString()
+    //               } tokens
+    //             </span>
+    //           </p>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   );
+    // }
   }
 
   // Games selection screen
@@ -223,18 +227,14 @@ export default function GamesSection() {
                   <div className="flex items-center justify-center space-x-2 text-yellow-400">
                     <span className="text-xs md:text-sm">🚧 Coming Soon</span>
                   </div>
-                ) : hasAccess ? (
+                ) : (
                   <div className="flex items-center justify-center space-x-2 text-green-400">
                     <span className="text-xs md:text-sm">✅ Available</span>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-center space-x-2 text-red-400">
-                    <span className="text-xs md:text-sm">🔒 Locked</span>
-                  </div>
                 )}
                 
-                {/* Progress indicator */}
-                {game.isAvailable && !hasAccess && (
+                {/* Progress indicator - temporarily commented out */}
+                {/* {game.isAvailable && !hasAccess && (
                   <div className="mt-3">
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
@@ -248,7 +248,7 @@ export default function GamesSection() {
                       {Math.round((userStakedAmount / game.stakingRequirement) * 100)}% to unlock
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           );

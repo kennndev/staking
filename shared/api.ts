@@ -10,4 +10,32 @@
 export interface DemoResponse {
     message: string;
   }
+
+// Leaderboard types
+export interface LeaderboardEntry {
+  rank: number;
+  walletAddress: string;
+  score: number;
+  gamesPlayed: number;
+  gameType: 'cyber-defense' | 'pop-pop' | 'global';
+  displayName: string;
+}
+
+export interface LeaderboardData {
+  cyberDefense: LeaderboardEntry[];
+  popPop: LeaderboardEntry[];
+  global: LeaderboardEntry[];
+}
+
+export interface SubmitScoreRequest {
+  walletAddress: string;
+  score: number;
+  gameType: 'cyber-defense' | 'pop-pop';
+}
+
+export interface SubmitScoreResponse {
+  success: boolean;
+  message: string;
+  newRank?: number;
+}
   

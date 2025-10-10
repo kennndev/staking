@@ -170,7 +170,7 @@ export function CyberDefense({ isGenerating = false, startTime = Date.now() }: C
     weaponRef.current = {
       type: 'default',
       duration: 0,
-      fireRate: 8,
+      fireRate: 4,
       damage: 1,
     };
     shieldRef.current = 0;
@@ -199,7 +199,7 @@ export function CyberDefense({ isGenerating = false, startTime = Date.now() }: C
       x,
       y,
       size: type === 'heavy' ? 25 : type === 'fast' ? 12 : 18,
-      speed: type === 'fast' ? 3 : type === 'heavy' ? 0.8 : 1.5,
+      speed: type === 'fast' ? 4 : type === 'heavy' ? 1.8 : 3,
       angle: 0,
       health: type === 'heavy' ? 3 : 1,
       type,
@@ -214,7 +214,7 @@ export function CyberDefense({ isGenerating = false, startTime = Date.now() }: C
 
     const player = playerRef.current;
     const weapon = weaponRef.current;
-    const speed = weapon.hasLaser ? 20 : 12;
+    const speed = weapon.hasLaser ? 30 : 18;
 
     if (weapon.hasTriple) {
       for (let i = -1; i <= 1; i++) {
@@ -341,7 +341,7 @@ export function CyberDefense({ isGenerating = false, startTime = Date.now() }: C
 
       // Wave spawning - faster waves
       waveTimerRef.current++;
-      const spawnRate = Math.max(20, 80 - gameState.wave * 8);
+      const spawnRate = Math.max(10, 45 - gameState.wave * 12);
       if (waveTimerRef.current % spawnRate === 0) {
         createEnemy(gameState.wave);
         // More enemies per spawn at higher waves
@@ -369,7 +369,7 @@ export function CyberDefense({ isGenerating = false, startTime = Date.now() }: C
           weaponRef.current = {
             type: 'default',
             duration: 0,
-            fireRate: 8,
+            fireRate: 4,
             damage: 1,
             hasRapid: false,
             hasTriple: false,

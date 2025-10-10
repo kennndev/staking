@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Games from "./pages/Games";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import { SiteHeader } from "./components/SiteHeader";
 import { SiteFooter } from "./components/SiteFooter";
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/games" element={<Games />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -50,10 +50,7 @@ const toDisplayKey = (key: any) => {
 
 const logProgramRequest = (scope: string, extra: Record<string, unknown> = {}) => {
   try {
-    console.log(`[Staking] ${scope}`, {
-      programId: toDisplayKey(PROGRAM_ID),
-      ...extra,
-    });
+  
   } catch (err) {
     console.log('[Staking] Failed to log program request', err);
   }
@@ -157,7 +154,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const CACHE_DURATION = 30000; // 30 seconds cache
   const initialStakingMint =
-    ENV.STAKING_MINT && ENV.STAKING_MINT !== '11111111111111111111111111111111'
+    ENV.STAKING_MINT && ENV.STAKING_MINT !== ''
       ? ENV.STAKING_MINT
       : null;
   const [stakingMint, setStakingMint] = useState<string | null>(initialStakingMint);
@@ -165,14 +162,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
   const [rewardDecimals, setRewardDecimals] = useState<number>(6);
   const [lastTransactionTime, setLastTransactionTime] = useState<number>(0);
 
-  useEffect(() => {
-    console.log('[Staking] Config snapshot', {
-      programId: toDisplayKey(PROGRAM_ID),
-      rpcUrl: RPC_URL,
-      envStakingMint: ENV.STAKING_MINT,
-      adminWallet: toDisplayKey(ADMIN_WALLET),
-    });
-  }, []);
 
     // Check if connected wallet is admin (compare against actual pool admin or configured admin)
     useEffect(() => {
@@ -185,22 +174,13 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       if (poolData) {
         const isAdminWallet = walletAddress === poolData.admin;
         setIsAdmin(isAdminWallet);
-        console.log('🔍 Admin check (pool exists):', { 
-          walletAddress, 
-          poolAdmin: poolData.admin, 
-          isAdmin: isAdminWallet 
-        });
+        
       } else {
         // If no pool exists, check against configured admin wallet
         const configuredAdmin = CONTRACT_CONFIG.ADMIN_WALLET;
         const isConfiguredAdmin = configuredAdmin && walletAddress === configuredAdmin;
         setIsAdmin(isConfiguredAdmin);
-        console.log('🔍 Admin check (no pool):', { 
-          walletAddress, 
-          configuredAdmin, 
-          isAdmin: isConfiguredAdmin 
-        });
-      }
+            }
     }, [walletAddress, poolData]);
   
     // Auto-detect pool when wallet connects
@@ -285,7 +265,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     // Check cache first
     const now = Date.now();
     if (!forceRefresh && dataCache.timestamp && (now - dataCache.timestamp) < CACHE_DURATION) {
-      console.log('📦 Using cached data');
       if (dataCache.poolData) setPoolData(dataCache.poolData);
       if (dataCache.userData) setUserData(dataCache.userData);
       return;
@@ -317,10 +296,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       });
       const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
       const program = await loadProgram(provider);
-      console.log('[Staking] refreshData -> program loaded', {
-        programId: toDisplayKey(program?.programId),
-      });
-
+   
       // Ensure IDL has Pool layout
       if (!program.idl.accounts?.some(a => a.name.toLowerCase() === 'pool')) {
         throw new Error("Loaded IDL missing 'pool' account in IDL");
@@ -341,16 +317,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           connection.getAccountInfo(userPda(program.programId, poolPDA, pk(walletAddress)))
         ]);
         
-        console.log('Raw pool data from blockchain:', {
-          stakingMint: pool.stakingMint?.toBase58?.() ?? 'undefined',
-          rewardRatePerSec: pool.rewardRatePerSec?.toString?.() ?? 'undefined',
-          rewardRatePerSecNumber: pool.rewardRatePerSec?.toNumber?.() ?? 0,
-          rewardMint: pool.rewardMint?.toBase58?.() ?? 'undefined',
-          totalStaked: pool.totalStaked?.toNumber?.() ?? 0,
-          admin: pool.admin?.toBase58?.() ?? 'undefined'
-        });
-        
-        const newPoolData = {
+             const newPoolData = {
           poolAddress: poolPDA.toBase58(),
           admin: pool.admin?.toBase58() ?? 'Unknown',
           stakingMint: pool.stakingMint?.toBase58() ?? 'Unknown',
@@ -375,13 +342,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
         let newUserData: UserData | null = null;
         if (userInfo) {
           const user = await (program.account as any).user.fetch(userPda(program.programId, poolPDA, pk(walletAddress)));
-          console.log('🔍 User account data:', {
-            owner: user.owner?.toBase58(),
-            staked: user.staked?.toNumber(),
-            debt: user.debt?.toString(),
-            unpaidRewards: user.unpaidRewards?.toString(),
-            bump: user.bump
-          });
+     
           newUserData = {
             owner: user.owner?.toBase58() ?? 'Unknown',
             staked: user.staked?.toNumber?.() ?? 0,
@@ -391,7 +352,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           };
           setUserData(newUserData);
         } else {
-          console.log('❌ User account not found - user needs to initialize');
           setUserData(null);
         }
 
@@ -425,41 +385,34 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     if (!walletAddress) return;
     
     try {
-      console.log('🔍 Setting up staking context...');
       
       // If we already have a staking mint set, try to fetch the pool for it
       if (stakingMint) {
         try {
-          console.log(`🔍 Trying to fetch pool for current staking mint: ${stakingMint}`);
           await fetchPoolByMint(stakingMint);
-          console.log('✅ Pool found for current staking mint!');
           return;
         } catch (error) {
-          console.log('❌ No pool found for current staking mint:', error instanceof Error ? error.message : String(error));
           console.log('💡 This is normal if the pool hasn\'t been created yet');
         }
       }
       
       // If no staking mint is set, use environment variable or leave empty for admin to set
-      if (ENV.STAKING_MINT && ENV.STAKING_MINT !== '11111111111111111111111111111111') {
+      if (ENV.STAKING_MINT && ENV.STAKING_MINT !== '') {
         console.log(`🔧 Setting staking mint from environment: ${ENV.STAKING_MINT}`);
         setStakingMint(ENV.STAKING_MINT);
         
         // Try to fetch the pool, but don't fail if it doesn't exist
         try {
           await fetchPoolByMint(ENV.STAKING_MINT);
-          console.log('✅ Pool found for environment staking mint!');
           return;
         } catch (error) {
           console.log('ℹ️ No pool found for environment staking mint (normal for new deployments)');
         }
       } else {
-        console.log('ℹ️ No staking mint configured - ready for admin to set up');
         console.log('💡 Use the admin interface to set the staking mint and initialize a pool');
       }
       
     } catch (error) {
-      console.log('❌ Auto-detection failed:', error);
       console.log('💡 This is normal for new deployments - use the admin interface to set up');
     }
   };
@@ -471,11 +424,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     setError(null);
     
     try {
-      console.log('[Staking] fetchPoolByMint invoked', {
-        stakingMint: stakingMintStr,
-        wallet: walletAddress,
-      });
-      
+        
       // Create wallet adapter
       const wallet = {
         publicKey: pk(walletAddress),
@@ -496,19 +445,11 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       logProgramRequest('fetchPoolByMint -> loadProgram');
       const provider = new AnchorProvider(connection, wallet, { commitment: 'confirmed' });
       const program = await loadProgram(provider);
-      console.log('[Staking] fetchPoolByMint -> program loaded', {
-        programId: toDisplayKey(program?.programId),
-      });
 
       // Derive the pool PDA for the given staking mint
       const stakingMint = new PublicKey(stakingMintStr);
       const poolPDA = poolPda(program.programId, stakingMint);
-      
-      console.log('Debug PDA derivation:', {
-        programId: program.programId.toBase58(),
-        stakingMint: stakingMint.toBase58(),
-        poolPDA: poolPDA.toBase58()
-      });
+  
       
       // Check if the account exists and has valid data before trying to fetch
       const accountInfo = await connection.getAccountInfo(poolPDA);
@@ -516,13 +457,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
         throw new Error('Pool account does not exist');
       }
       
-      console.log('Pool account info:', {
-        owner: accountInfo.owner.toBase58(),
-        executable: accountInfo.executable,
-        lamports: accountInfo.lamports,
-        dataLength: accountInfo.data?.length,
-        isProgramAccount: accountInfo.owner.equals(program.programId)
-      });
+
       
       // Validate that the account is owned by our program
       if (!accountInfo.owner.equals(program.programId)) {
@@ -535,7 +470,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       }
       
       // Check account discriminator to verify it's actually a Pool account
-      console.log('🔍 Checking account discriminator...');
       const discPool = BorshAccountsCoder.accountDiscriminator('Pool');
       const discUser = BorshAccountsCoder.accountDiscriminator('User');
       const got = accountInfo.data.slice(0, 8);
@@ -543,14 +477,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       const isPool = Buffer.compare(got, discPool) === 0;
       const isUser = Buffer.compare(got, discUser) === 0;
       
-      console.log('Discriminator check:', {
-        isPool,
-        isUser,
-        gotDiscriminator: Array.from(got),
-        expectedPoolDisc: Array.from(discPool),
-        expectedUserDisc: Array.from(discUser)
-      });
-      
+       
       if (isUser) {
         throw new Error('Account at pool PDA is a User account, not a Pool account. Check your PDA derivation seeds.');
       }
@@ -559,34 +486,17 @@ export function StakingProvider({ children }: { children: ReactNode }) {
         throw new Error('Account at pool PDA is not a Pool account (discriminator mismatch). This might be a different account type or corrupted data.');
       }
       
-      console.log('✅ Account discriminator matches Pool - proceeding with decode');
       
       // Try to fetch the pool data with better error handling
       let pool;
       try {
         pool = await (program.account as any).pool.fetch(poolPDA);
-        console.log('Pool data fetched successfully:', pool);
       } catch (decodeError) {
-        console.error('Failed to decode pool account:', decodeError);
-        console.log('Account data length:', accountInfo.data.length);
-        console.log('Account data (first 32 bytes):', accountInfo.data.slice(0, 32));
+   
         
         // Check if this might be a different account type or corrupted data
         if (decodeError instanceof Error && decodeError.message.includes('beyond buffer length')) {
-          console.log('🔍 Account Analysis:');
-          console.log('- Account exists and discriminator matches Pool');
-          console.log('- But IDL layout mismatch:');
-          console.log(`  - On-chain data length: ${accountInfo.data.length} bytes`);
-          console.log(`  - Expected by local IDL: ~265 bytes`);
-          console.log(`  - Difference: ${accountInfo.data.length - 265} bytes`);
-          console.log('💡 This means your local IDL does not match the deployed program');
-          console.log('💡 Solutions:');
-          console.log('  1. Use the exact IDL that was compiled with the deployed program');
-          console.log('  2. Rebuild and redeploy the program to match your current IDL');
-          console.log('  3. Check if the program was updated but IDL wasn\'t updated');
-          console.log('  4. Verify the _reserved array length in your struct');
-          
-          throw new Error(`Pool decode failed: IDL/program layout mismatch. Account data length=${accountInfo.data.length} bytes, but your local IDL expects ~265 bytes. Update your IDL to match the deployed binary (or redeploy the program).`);
+                  throw new Error(`Pool decode failed: IDL/program layout mismatch. Account data length=${accountInfo.data.length} bytes, but your local IDL expects ~265 bytes. Update your IDL to match the deployed binary (or redeploy the program).`);
         }
         throw decodeError;
       }
@@ -621,11 +531,7 @@ export function StakingProvider({ children }: { children: ReactNode }) {
         
         setStakingDecimals(stakingInfo.decimals ?? 6);
         setRewardDecimals(rewardInfo.decimals ?? 6);
-        
-        console.log('Token decimals fetched:', {
-          staking: stakingInfo.decimals,
-          reward: rewardInfo.decimals
-        });
+    
       } catch (decimalError) {
         console.warn('Failed to fetch token decimals, using defaults:', decimalError);
         setStakingDecimals(6);
@@ -643,13 +549,11 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           unpaidRewards: user.unpaidRewards?.toString?.() ?? '0',
           bump: user.bump ?? 0,
         });
-        console.log('User data fetched:', user);
       } catch (userError) {
         console.log('User account not found yet (normal for new users):', userError);
         setUserData(null);
       }
       
-      console.log('✅ Pool data loaded successfully');
       
     } catch (e: any) {
       console.error('❌ Failed to fetch pool:', e);
@@ -689,13 +593,10 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       };
 
       // Add a small delay to prevent rapid-fire transactions
-      console.log('⏳ Waiting 1 second before submitting transaction...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Get fresh blockhash to prevent "Blockhash not found" errors
-      console.log('🔄 Getting fresh blockhash...');
       const { blockhash } = await connection.getLatestBlockhash('confirmed');
-      console.log('✅ Fresh blockhash obtained:', blockhash);
 
       // Initialize on-chain (creates Pool PDA + stakingVault ATA)
       const initRes = await initializeOnly(stakingMint, wallet);
@@ -728,25 +629,21 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       // Pull fresh Pool/User from chain
       await refreshData();
     } catch (e: any) {
-      console.error('initializePool error:', e);
       
       // Check if pool already exists
       if (e?.message?.includes('already in use') || e?.logs?.some((log: string) => log.includes('already in use'))) {
-        console.log('Pool already exists, fetching existing pool data...');
         
         try {
           // Derive the pool PDA for the given staking mint
           const stakingMintPk = new PublicKey(stakingMint);
           const poolPDA = poolPda(PROGRAM_ID, stakingMintPk);
           
-          console.log('Fetching existing pool at:', poolPDA.toBase58());
           
           // Load the existing pool data
           await fetchPoolByMint(stakingMint);
           console.log('✅ Existing pool data loaded successfully');
           return; // Success - pool data is now loaded
         } catch (loadError) {
-          console.error('Failed to load existing pool data:', loadError);
           setError('Pool exists but could not load data. Please refresh the page.');
           throw loadError;
         }
@@ -790,20 +687,11 @@ export function StakingProvider({ children }: { children: ReactNode }) {
              const decimals = mintInfo.decimals ?? 0;
              const ratePerSecBase = toBaseUnits(humanRatePerSec, decimals);
 
-             console.log('Updating reward rate:', {
-               humanRate: humanRatePerSec,
-               decimals,
-               baseRate: ratePerSecBase.toString()
-             });
-
              // Add a small delay to prevent rapid-fire transactions
-             console.log('⏳ Waiting 1 second before submitting transaction...');
              await new Promise(resolve => setTimeout(resolve, 1000));
              
              // Get fresh blockhash to prevent "Blockhash not found" errors
-             console.log('🔄 Getting fresh blockhash...');
              const { blockhash } = await connection.getLatestBlockhash('confirmed');
-             console.log('✅ Fresh blockhash obtained:', blockhash);
 
              const sig = await program.methods
                .setRewardRate(ratePerSecBase)
@@ -816,7 +704,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
                  preflightCommitment: 'processed'
                });
 
-             console.log('✅ setRewardRate tx:', sig);
              await new Promise(r => setTimeout(r, 1200));
              await refreshData();
     } catch (e: any) {
@@ -824,17 +711,14 @@ export function StakingProvider({ children }: { children: ReactNode }) {
       
       // Handle specific transaction errors
       if (e?.message?.includes('already been processed')) {
-        console.log('🔄 Transaction already processed - treating as success');
-        console.log('✅ setRewardRate successful (transaction was already processed)');
+
         await refreshData();
         return;
       } else if (e?.message?.includes('Blockhash not found')) {
-        console.log('🔄 Blockhash not found - this is a network timing issue');
-        console.log('💡 This usually resolves itself, please try again');
+     
         throw new Error('Network timing issue. Please try again in a moment.');
       } else if (e?.message?.includes('simulation failed')) {
-        console.log('🔄 Transaction simulation failed - checking for specific issues');
-        console.log('💡 This might be due to pool configuration issues or insufficient permissions');
+
         throw new Error('Transaction simulation failed. Please check your admin permissions and try again.');
       } else {
         setError(e?.message ?? 'Failed to update rate');
@@ -868,21 +752,15 @@ export function StakingProvider({ children }: { children: ReactNode }) {
 
       const poolPDA = pk(poolData.poolAddress);
 
-      console.log(`🔄 ${paused ? 'Pausing' : 'Unpausing'} pool...`);
-      console.log('Pool PDA:', poolPDA.toBase58());
 
       // Add a small delay to prevent rapid-fire transactions
-      console.log('⏳ Waiting 1 second before submitting transaction...');
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Get fresh blockhash to prevent "Blockhash not found" errors
-      console.log('🔄 Getting fresh blockhash...');
       const { blockhash } = await connection.getLatestBlockhash('confirmed');
-      console.log('✅ Fresh blockhash obtained:', blockhash);
 
       // Build transaction manually to avoid Anchor's blockhash cache
       try {
-        console.log('🔄 Building setPaused instruction manually...');
         
         // Get the setPaused instruction (not the full transaction)
         const setPausedIx = await program.methods
@@ -901,7 +779,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
           data: Buffer.from(`setPaused:${uniqueId}`, 'utf8')
         });
         
-        console.log('🔄 Using unique memo:', uniqueId);
         
         // Build transaction manually
         const tx = new Transaction().add(memoIx, setPausedIx);
@@ -912,7 +789,6 @@ export function StakingProvider({ children }: { children: ReactNode }) {
         tx.lastValidBlockHeight = lastValidBlockHeight;
         tx.feePayer = pk(walletAddress);
         
-        console.log('🔄 Using fresh blockhash:', freshBlockhash);
         
         // Sign and send manually
         const signed = await wallet.signTransaction(tx);
@@ -1420,16 +1296,16 @@ export function StakingProvider({ children }: { children: ReactNode }) {
     try {
       console.log('Unstaking tokens:', { amount, walletAddress, poolAddress: poolData.poolAddress });
       
-      // IMPORTANT: Claim rewards first to preserve them before unstaking
+      // COMMENTED OUT: Claim rewards first to preserve them before unstaking
       // This prevents the unstake from resetting pending rewards
-      console.log('🔄 Claiming rewards before unstaking to preserve them...');
-      try {
-        await claim();
-        console.log('✅ Rewards claimed successfully before unstaking');
-      } catch (claimError) {
-        console.log('⚠️ Could not claim rewards before unstaking (this is OK if no rewards to claim):', claimError);
-        // Continue with unstake even if claim fails (user might have no rewards)
-      }
+      // console.log('🔄 Claiming rewards before unstaking to preserve them...');
+      // try {
+      //   await claim();
+      //   console.log('✅ Rewards claimed successfully before unstaking');
+      // } catch (claimError) {
+      //   console.log('⚠️ Could not claim rewards before unstaking (this is OK if no rewards to claim):', claimError);
+      //   // Continue with unstake even if claim fails (user might have no rewards)
+      // }
       
       // Create wallet adapter
       const wallet = {
